@@ -1,0 +1,6 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/dbrain/Scripts/python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/dbrain/Lib/site-packages"
+  ]
+}
