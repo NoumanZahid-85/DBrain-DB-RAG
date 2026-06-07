@@ -8,3 +8,4 @@ bm25_index.pkl
 .agents/
 .pyconfig.json
 skills-lock.json
+pyrightconfig.json
