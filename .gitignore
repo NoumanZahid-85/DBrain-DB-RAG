@@ -6,4 +6,5 @@ venv/
 dbrain/
 bm25_index.pkl
 .agents/
-
+.pyconfig.json
+skills-lock.json
