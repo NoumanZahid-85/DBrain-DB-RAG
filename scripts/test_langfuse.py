@@ -19,7 +19,7 @@ llm = ChatGoogleGenerativeAI(
 
 # Run LLM with callback handler
 response = llm.invoke(
-    [HumanMessage(content="Hello, trace this! Say hi back.")],
+    [HumanMessage(content="Hello, Who is the best athlete in the world?")],
     config={"callbacks": [langfuse_handler]}
 )
 
