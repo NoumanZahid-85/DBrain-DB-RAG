@@ -1,0 +1,58 @@
+name: RAG Quality Gate — Jina + Groq
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # No need to rebuild vectorstore – use the committed chroma_db_local
+      - name: Build BM25 index (lightweight, uses existing chunks)
+        run: cd backend && python hybrid_retrieval.py
+
+      - name: Run full RAGAS evaluation (all databases)
+        env:
+          JINA_API_KEY: ${{ secrets.JINA_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          USE_OLLAMA: false
+          CHROMA_PERSIST_DIR: ./chroma_db_local
+          LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+          LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          LANGFUSE_HOST: https://cloud.langfuse.com
+        run: python eval/run_eval.py
+
+      - name: Run per-database eval (informational, does not block)
+        if: always()
+        env:
+          JINA_API_KEY: ${{ secrets.JINA_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          USE_OLLAMA: false
+          CHROMA_PERSIST_DIR: ./chroma_db_local
+        run: |
+          python eval/run_eval.py postgresql || true
+          python eval/run_eval.py mysql       || true
+          python eval/run_eval.py mongodb     || true
+
+      - name: Upload eval results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results-${{ github.sha }}
+          path: eval/last_results.json
