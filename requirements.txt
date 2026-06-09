@@ -25,4 +25,4 @@ beautifulsoup4==4.14.3
 cloudscraper==1.2.71
 
 # Reranker (lightweight cross‑encoder – required for `reranker.py`)
-sentence-transformers==2.7.0   # ~80MB, safe for 512MB free tier
+# sentence-transformers==2.7.0   # ~80MB, safe for 512MB free tier
