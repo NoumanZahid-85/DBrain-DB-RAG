@@ -1,0 +1,77 @@
+[
+  {
+    "question": "What is a B-tree index and when should I use it in PostgreSQL?",
+    "ground_truth": "A B-tree index is the default index type in PostgreSQL. It handles equality and range queries on sortable data. Use it when query conditions involve <, <=, =, >=, >, BETWEEN, IN, IS NULL, or LIKE patterns with a non-wildcard prefix.",
+    "db": "postgresql"
+  },
+  {
+    "question": "How does VACUUM prevent table bloat in PostgreSQL?",
+    "ground_truth": "VACUUM reclaims space from dead tuples — rows deleted or updated. Without it, dead tuples accumulate and bloat tables. AUTOVACUUM runs automatically. VACUUM FULL rewrites the table entirely, reclaiming maximum space but requiring an exclusive lock.",
+    "db": "postgresql"
+  },
+  {
+    "question": "What is pg_stat_statements and how do I use it?",
+    "ground_truth": "pg_stat_statements is a PostgreSQL extension that tracks execution statistics for all SQL statements. It shows call counts, total and mean execution time, and rows returned. Enable it in postgresql.conf with shared_preload_libraries = 'pg_stat_statements'.",
+    "db": "postgresql"
+  },
+  {
+    "question": "How do I use EXPLAIN ANALYZE in PostgreSQL?",
+    "ground_truth": "EXPLAIN ANALYZE executes the query and shows the actual execution plan with real row counts and timing. Add BUFFERS to see cache hit statistics. Unlike EXPLAIN alone, ANALYZE runs the query so use it on read-only queries or inside a transaction you can roll back.",
+    "db": "postgresql"
+  },
+  {
+    "question": "What is MVCC in PostgreSQL?",
+    "ground_truth": "Multi-Version Concurrency Control allows concurrent transactions without blocking by keeping multiple versions of rows. Each transaction sees a snapshot of the database at transaction start. Old row versions accumulate until VACUUM removes them.",
+    "db": "postgresql"
+  },
+  {
+    "question": "How does InnoDB handle deadlocks in MySQL?",
+    "ground_truth": "InnoDB automatically detects deadlocks by examining the wait-for graph. When a deadlock is found, InnoDB rolls back the transaction that holds the fewest row-level locks. The error 1213 is returned to the rolled-back transaction. Applications should catch this error and retry.",
+    "db": "mysql"
+  },
+  {
+    "question": "What is the InnoDB buffer pool and how do I tune it?",
+    "ground_truth": "The InnoDB buffer pool is an in-memory cache for table and index data. Set innodb_buffer_pool_size to 70-80% of available RAM on a dedicated database server. Monitor the buffer pool hit ratio; values below 99% indicate insufficient memory.",
+    "db": "mysql"
+  },
+  {
+    "question": "How do I use the MySQL slow query log?",
+    "ground_truth": "Enable the slow query log by setting slow_query_log=ON and long_query_time to your threshold in seconds. Set slow_query_log_file to the output path. Use mysqldumpslow or pt-query-digest to analyze the log. The log captures queries exceeding the time threshold.",
+    "db": "mysql"
+  },
+  {
+    "question": "What does OPTIMIZE TABLE do in MySQL?",
+    "ground_truth": "OPTIMIZE TABLE reorganizes the physical storage of table data and associated index data to reduce storage space and improve I/O efficiency. For InnoDB tables it rebuilds the table to update index statistics and compact clustered index space. It is equivalent to ALTER TABLE ... FORCE.",
+    "db": "mysql"
+  },
+  {
+    "question": "How does MySQL replication work?",
+    "ground_truth": "MySQL replication uses a binary log on the source and a relay log on the replica. The source writes all changes to the binary log. The replica's I/O thread reads the binary log and writes it to the relay log. The replica's SQL thread replays the relay log events.",
+    "db": "mysql"
+  },
+  {
+    "question": "How do I create an index on a MongoDB collection?",
+    "ground_truth": "Use db.collection.createIndex({field: 1}) for ascending or {field: -1} for descending. MongoDB supports single field, compound, multikey (array), text, geospatial, hashed, and wildcard indexes. Use the background option for non-blocking index builds on large collections.",
+    "db": "mongodb"
+  },
+  {
+    "question": "How does the MongoDB aggregation pipeline work?",
+    "ground_truth": "The aggregation pipeline processes documents through a sequence of stages. Each stage transforms the documents. Common stages include $match (filter), $group (group and aggregate), $sort, $project (reshape), $lookup (join), and $unwind (flatten arrays). Stages are passed as an array to aggregate().",
+    "db": "mongodb"
+  },
+  {
+    "question": "How do I interpret MongoDB explain output?",
+    "ground_truth": "MongoDB explain() returns execution stats. Check the winningPlan for the query plan chosen. A COLLSCAN means a full collection scan — add an index. An IXSCAN shows an index was used. Check totalDocsExamined vs nReturned; a large ratio means the index is not selective enough.",
+    "db": "mongodb"
+  },
+  {
+    "question": "What is the MongoDB database profiler?",
+    "ground_truth": "The database profiler captures operation data for slow queries. Set the profiling level to 0 (off), 1 (slow ops only), or 2 (all ops) using db.setProfilingLevel(). Profiled operations are stored in the system.profile capped collection. Use slowOpThresholdMs to set the slow op threshold.",
+    "db": "mongodb"
+  },
+  {
+    "question": "How does MongoDB replication work?",
+    "ground_truth": "MongoDB uses replica sets for replication. A replica set contains one primary and one or more secondaries. The primary accepts all write operations and records changes to its oplog. Secondaries replicate the oplog asynchronously. If the primary fails, an election selects a new primary.",
+    "db": "mongodb"
+  }
+]

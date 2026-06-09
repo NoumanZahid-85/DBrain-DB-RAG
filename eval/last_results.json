@@ -1,0 +1,7 @@
+{
+  "faithfulness": 0.0,
+  "answer_relevancy": 0.0,
+  "context_precision": 0.0,
+  "db_filter": "mysql",
+  "n_questions": 1
+}
