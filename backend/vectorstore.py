@@ -1,7 +1,6 @@
 import os
-import time
 import chromadb
-from sentence_transformers import SentenceTransformer
+from langchain_community.embeddings import JinaEmbeddings
 from langchain_core.documents import Document
 from dotenv import load_dotenv
 
@@ -13,39 +12,36 @@ CHROMA_PERSIST_DIR = os.path.join(PROJECT_ROOT, _raw_chroma) if not os.path.isab
 COLLECTION_NAME = "multi_db_docs"
 VALID_DB_FILTERS = {"postgresql", "mysql", "mongodb"}
 
-_MODEL_NAME = "all-MiniLM-L6-v2"
-_EMBED_MODEL = None
+# Jina Embeddings (free tier: 1M tokens)
+_JINA_MODEL = None
 
-
-def get_embed_model() -> SentenceTransformer:
-    global _EMBED_MODEL
-    if _EMBED_MODEL is None:
-        print(f"Loading local SentenceTransformer model: {_MODEL_NAME}...")
-        _EMBED_MODEL = SentenceTransformer(_MODEL_NAME)
-    return _EMBED_MODEL
-
+def get_embed_model() -> JinaEmbeddings:
+    global _JINA_MODEL
+    if _JINA_MODEL is None:
+        api_key = os.getenv("JINA_API_KEY")
+        if not api_key:
+            raise ValueError("JINA_API_KEY not set in environment. Get one from https://jina.ai/embeddings")
+        print("Initialising Jina Embeddings (jina-embeddings-v4)...")
+        _JINA_MODEL = JinaEmbeddings(
+            jina_api_key=api_key,
+            model_name="jina-embeddings-v4",
+            session=None
+        )
+    return _JINA_MODEL
 
 def get_embedding_model() -> str:
-    return _MODEL_NAME
-
+    return "jina-embeddings-v4"
 
 def _embed_batch(texts: list[str]) -> list[list[float]]:
-    """Embed a batch of texts using the local sentence-transformer model."""
     model = get_embed_model()
-    embeddings = model.encode(texts, batch_size=64, show_progress_bar=False)
-    return embeddings.tolist()
-
+    return model.embed_documents(texts)
 
 def _embed_single(text: str) -> list[float]:
-    """Embed a single query text."""
     model = get_embed_model()
-    embedding = model.encode(text, show_progress_bar=False)
-    return embedding.tolist()
-
+    return model.embed_query(text)
 
 def get_chroma_client() -> chromadb.PersistentClient:
     return chromadb.PersistentClient(path=CHROMA_PERSIST_DIR)
-
 
 def get_or_create_collection(client: chromadb.PersistentClient) -> chromadb.Collection:
     return client.get_or_create_collection(
@@ -53,23 +49,25 @@ def get_or_create_collection(client: chromadb.PersistentClient) -> chromadb.Coll
         metadata={"hnsw:space": "cosine"},
     )
 
-
 def index_chunks(chunks: list[Document]) -> chromadb.Collection:
+    """
+    Index chunks using Jina embeddings. Skips already indexed chunks.
+    Run this once after changing the embedding model.
+    """
     chroma = get_chroma_client()
     collection = get_or_create_collection(chroma)
 
-    # Resume indexing – skip already present chunks
     existing_ids = set(collection.get(include=[])["ids"]) if collection.count() > 0 else set()
     pending = [(i, c) for i, c in enumerate(chunks) if f"chunk_{c.metadata['chunk_id']}" not in existing_ids]
 
     if not pending:
-        print(f"All {len(chunks)} chunks already indexed. Delete chroma_db_local/ to re-index.")
+        print(f"All {len(chunks)} chunks already indexed.")
         return collection
 
     print(f"  {len(existing_ids)} already indexed, {len(pending)} remaining.")
-    print("  Embedding locally using SentenceTransformer (all-MiniLM-L6-v2) in batches of 64...")
+    print("  Embedding with Jina (jina-embeddings-v4) in batches of 64...")
 
-    BATCH_SIZE = 64
+    BATCH_SIZE = 32
     total = len(pending)
 
     for i in range(0, total, BATCH_SIZE):
@@ -80,7 +78,6 @@ def index_chunks(chunks: list[Document]) -> chromadb.Collection:
 
         embeddings = _embed_batch(batch_texts)
 
-        # Insert into ChromaDB immediately (checkpoint)
         collection.add(
             embeddings=embeddings,
             documents=batch_texts,
@@ -93,7 +90,6 @@ def index_chunks(chunks: list[Document]) -> chromadb.Collection:
 
     print(f"\nDone. {collection.count()} total chunks in ChromaDB.")
     return collection
-
 
 def semantic_search(query: str, top_k: int = 10, db_filter: str | None = None) -> list[dict]:
     chroma = get_chroma_client()
@@ -133,7 +129,6 @@ def semantic_search(query: str, top_k: int = 10, db_filter: str | None = None) -
             })
     return chunks
 
-
 def get_index_stats() -> dict:
     chroma = get_chroma_client()
     collection = get_or_create_collection(chroma)
@@ -143,7 +138,6 @@ def get_index_stats() -> dict:
         result = collection.get(where={"db": {"$eq": db}}, include=[])
         stats[db] = len(result["ids"]) if result else 0
     return stats
-
 
 if __name__ == "__main__":
     from ingest import load_documents, chunk_documents
