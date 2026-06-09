@@ -23,11 +23,13 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # No need to rebuild vectorstore – use the committed chroma_db_local
-      - name: Build BM25 index (lightweight, uses existing chunks)
+      # No download_corpus.py needed – your DB is already committed.
+      # No vectorstore.py rebuild – use the committed chroma_db_local.
+
+      - name: Build BM25 index (uses existing chunks)
         run: cd backend && python hybrid_retrieval.py
 
-      - name: Run full RAGAS evaluation (all databases)
+      - name: Run full RAGAS evaluation
         env:
           JINA_API_KEY: ${{ secrets.JINA_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -38,7 +40,7 @@ jobs:
           LANGFUSE_HOST: https://cloud.langfuse.com
         run: python eval/run_eval.py
 
-      - name: Run per-database eval (informational, does not block)
+      - name: Run per-database eval (informational)
         if: always()
         env:
           JINA_API_KEY: ${{ secrets.JINA_API_KEY }}
