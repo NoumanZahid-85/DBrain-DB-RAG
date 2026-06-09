@@ -12,4 +12,4 @@ RAG_Project_Roadmap_v2.md
 my_chroma_db
 scripts/test_embed.py
 .agents
-
+frontend/node_modules
