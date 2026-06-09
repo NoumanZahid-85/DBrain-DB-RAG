@@ -153,6 +153,28 @@ def get_metrics():
         "refusal_rate_pct": round((refused / n) * 100, 1),
         "requests_by_database": db_counts,
     }
+@app.get("/debug/embed")
+async def debug_embed(query: str):
+    from vectorstore import _embed_single, get_chroma_client, get_or_create_collection
+    import numpy as np
+
+    q_emb = _embed_single(query)
+    client = get_chroma_client()
+    coll = get_or_create_collection(client)
+    # Get one stored chunk with its embedding
+    result = coll.get(limit=1, include=["embeddings", "documents"])
+    if not result or not result['embeddings']:
+        return {"error": "No embeddings found in DB"}
+    stored_emb = result['embeddings'][0]
+    # Cosine similarity
+    sim = np.dot(q_emb, stored_emb) / (np.linalg.norm(q_emb) * np.linalg.norm(stored_emb))
+    return {
+        "query_preview": query,
+        "query_embedding_first5": [float(x) for x in q_emb[:5]],
+        "stored_embedding_first5": [float(x) for x in stored_emb[:5]],
+        "cosine_similarity": float(sim),
+        "stored_doc_preview": result['documents'][0][:100]
+    }
 
 
 if __name__ == "__main__":

@@ -115,11 +115,15 @@ def format_context(chunks: list[dict]) -> str:
     return "\n\n---\n\n".join(parts)
 
 def generate_answer(query: str, chunks: list[dict]) -> dict:
-    # Use fused_score or original score – no rerank score anymore
-    relevant = [
-        c for c in chunks
-        if c.get("fused_score", c.get("score", 0.0)) > 0.15
-    ]
+    # Use fused_score or original score – no rerank score anymore.
+    # Note: RRF (fused) scores are mathematically bounded by 2/(60+1) ≈ 0.0328.
+    # A threshold of 0.01 corresponds to being in the top results of at least one search type.
+    relevant = []
+    for c in chunks:
+        score = c.get("fused_score", c.get("score", 0.0))
+        threshold = 0.01 if "fused_score" in c else 0.15
+        if score > threshold:
+            relevant.append(c)
     if not relevant:
         return {
             "answer": "I cannot answer this question based on the available documentation. No relevant chunks found.",
