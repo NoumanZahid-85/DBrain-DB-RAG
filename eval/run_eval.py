@@ -101,7 +101,6 @@ def run_evaluation(db_filter_eval: str | None = None):
 
     print("\nRunning RAGAS scoring...")
     sys.stdout.flush()
-    from langchain_community.embeddings import HuggingFaceEmbeddings
     from ragas.llms import LangchainLLMWrapper
     from ragas.embeddings import LangchainEmbeddingsWrapper
     from vectorstore import get_embedding_model
@@ -131,9 +130,21 @@ def run_evaluation(db_filter_eval: str | None = None):
         print("Evaluator LLM: Using Google Gemini (gemini-1.5-flash)")
 
     evaluator_llm = LangchainLLMWrapper(eval_llm_obj)
-    evaluator_embeddings = LangchainEmbeddingsWrapper(HuggingFaceEmbeddings(
-        model_name=get_embedding_model()
-    ))
+
+    if not os.getenv("GOOGLE_API_KEY"):
+        # Local fallback only if GOOGLE_API_KEY is not set
+        from langchain_community.embeddings import HuggingFaceEmbeddings
+        eval_embeddings_obj = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        print("Evaluator Embeddings: Using local HuggingFace (all-MiniLM-L6-v2)")
+    else:
+        from langchain_google_genai import GoogleGenerativeAIEmbeddings
+        eval_embeddings_obj = GoogleGenerativeAIEmbeddings(
+            model=get_embedding_model(),
+            google_api_key=os.getenv("GOOGLE_API_KEY")
+        )
+        print(f"Evaluator Embeddings: Using Gemini ({get_embedding_model()})")
+
+    evaluator_embeddings = LangchainEmbeddingsWrapper(eval_embeddings_obj)
 
     from ragas import RunConfig
     run_config = RunConfig(timeout=300)

@@ -1,12 +1,19 @@
-from sentence_transformers import CrossEncoder
+try:
+    from sentence_transformers import CrossEncoder
+    HAS_RERANKER = True
+except ImportError:
+    HAS_RERANKER = False
+
 import time
 
 MODEL_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 _model = None
 
 
-def get_reranker() -> CrossEncoder:
+def get_reranker() -> CrossEncoder | None:
     global _model
+    if not HAS_RERANKER:
+        return None
     if _model is None:
         print(f"Loading cross-encoder: {MODEL_NAME} (first load ~30s)")
         _model = CrossEncoder(MODEL_NAME)
@@ -25,6 +32,12 @@ def rerank(query: str, chunks: list[dict], top_k: int = 5) -> list[dict]:
         return chunks
 
     model = get_reranker()
+    if model is None:
+        print("Reranker: sentence-transformers not installed. Bypassing reranking stage.")
+        for chunk in chunks:
+            chunk["rerank_score"] = chunk.get("fused_score", chunk.get("score", 0.0))
+        return chunks[:top_k]
+
     t0 = time.perf_counter()
 
     pairs = [(query, c["text"]) for c in chunks]

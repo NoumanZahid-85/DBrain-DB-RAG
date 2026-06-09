@@ -1,0 +1,42 @@
+name: RAG Pipeline Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build BM25 index
+        env:
+          JINA_API_KEY: ${{ secrets.JINA_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          USE_OLLAMA: false
+          CHROMA_PERSIST_DIR: ./chroma_db_local
+        run: cd backend && python hybrid_retrieval.py
+
+      - name: Test a sample query
+        env:
+          JINA_API_KEY: ${{ secrets.JINA_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          USE_OLLAMA: false
+          CHROMA_PERSIST_DIR: ./chroma_db_local
+        run: |
+          cd backend
+          python -c "from rag_chain import query_rag; r = query_rag('What is a B-tree index?'); print('OK, answer length:', len(r['answer']))"
