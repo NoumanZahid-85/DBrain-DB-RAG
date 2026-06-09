@@ -5,8 +5,11 @@ A production-grade, metrics-driven, and CI-gated **Retrieval-Augmented Generatio
 This project serves as **Module 7 (Chat Interface & RAG)** for **DBrain**—an AI-powered database performance co-pilot. It is designed to act as a production-grade portfolio piece, featuring hybrid retrieval, cross-encoder reranking, observability tracing, and automated quality evaluation gates.
 
 ---
+#### DBrain Rag Frontend
+DBrain Performance RAG is working with different user queries:
+![Rag Frontend](images/frontend.png)
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```mermaid
 graph TD
@@ -43,7 +46,7 @@ graph TD
 
 ---
 
-## 🛠️ Tech Stack & Key Concepts
+## Tech Stack & Key Concepts
 
 | Component | Technology | Role / Explanation |
 |---|---|---|
@@ -61,7 +64,7 @@ graph TD
 
 ---
 
-## 🚀 Key Features Done So Far
+## Key Features Done So Far
 
 1. **Aesthetic & Professional UI:** A dark/black theme designed with modern typography (`Plus Jakarta Sans` & `JetBrains Mono`), smooth transitions, responsive grid dashboard layout, and real-time query performance monitoring (Latency, Retrieved vs. Used chunks, Rerank Scores, and Routing).
 2. **Database Query Routing:** Scans queries for structural database keywords (e.g., `vacuum` -> PostgreSQL, `innodb` -> MySQL, `aggregation pipeline` -> MongoDB). If a specific database is detected, the search is scoped exclusively to that database's official documentation to eliminate cross-talk and improve retrieval precision.
@@ -71,7 +74,7 @@ graph TD
 6. **Cross-Encoder Reranking:** Integrates `sentence-transformers` Cross-Encoder to evaluate the candidate context chunks against the user's query, outputting a precise relevance score.
 7. **Production Observability & Tracing:** Implements full Langfuse dashboard integration to log token usage, execute traces, track latency across retrieval/reranking/generation phases, and run automated evaluations.
 
-### 📊 Observability Tracing Screenshots
+### Observability Tracing Screenshots
 
 #### Trace Latency Overview
 Shows request execution flow, token counts, and API response latencies inside the Langfuse console:
@@ -87,7 +90,7 @@ Verifies system instructions, injected context blocks, and generated citations m
 
 ---
 
-## 🧹 Housekeeping: Redundant Files
+## Housekeeping: Redundant Files
 To keep the workspace clean and optimize disk space, the following directories are **not necessary** and can be safely removed:
 *   `chroma_db/`: Redundant vector store folder (active database is configured to `./chroma_db_local` in the `.env`).
 *   `chroma_db_v2/`: Redundant vector store folder.
@@ -95,7 +98,7 @@ To keep the workspace clean and optimize disk space, the following directories a
 
 ---
 
-## 💻 Local Setup & Execution
+## Local Setup & Execution
 
 ### 1. Prerequisites
 Ensure you have the following installed:
@@ -152,7 +155,7 @@ npm start
 
 ---
 
-## 📊 Run Evaluations
+## Run Evaluations
 
 To run evaluation on the golden Q&A dataset (e.g. testing only 1 question to verify behavior quickly):
 ```powershell
@@ -164,7 +167,7 @@ python eval/run_eval.py mysql
 
 ---
 
-## 🔬 GitHub Actions CI Gate
+## GitHub Actions CI Gate
 
 The repository has an integrated GitHub Actions workflow `.github/workflows/eval.yml`. Every time you push a commit or open a pull request:
 1. The runner downloads the corpus and builds the database.
