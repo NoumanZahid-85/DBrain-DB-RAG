@@ -75,15 +75,15 @@ graph TD
 
 #### Trace Latency Overview
 Shows request execution flow, token counts, and API response latencies inside the Langfuse console:
-![Langfuse Trace Latency Overview](file:///d:/Actual%20Portfolio%20Projects/dbrain-db-rag/images/langfuse1.png)
+![Langfuse Trace Latency Overview](images/langfuse1.png)
 
 #### Request Span Analysis
 Detailed breakdown of execution stages: Retrieval, Reranking, and Generation token usages:
-![Langfuse Request Span Analysis](file:///d:/Actual%20Portfolio%20Projects/dbrain-db-rag/images/lanfuse2.png)
+![Langfuse Request Span Analysis](images/lanfuse2.png)
 
 #### Prompt Verification & Outputs
 Verifies system instructions, injected context blocks, and generated citations matching the target docs:
-![Langfuse Prompt Verification](file:///d:/Actual%20Portfolio%20Projects/dbrain-db-rag/images/langfuse3.png)
+![Langfuse Prompt Verification](images/langfuse3.png)
 
 ---
 

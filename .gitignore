@@ -4,16 +4,12 @@ data/
 __pycache__/
 venv/
 dbrain/
-bm25_index.pkl
 .agents/
 .pyconfig.json
 skills-lock.json
 pyrightconfig.json
 RAG_Project_Roadmap_v2.md
 my_chroma_db
-chroma_db_local/
-chroma_db_v2/
 scripts/test_embed.py
 .agents
-
 
