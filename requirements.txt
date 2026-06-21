@@ -6,9 +6,16 @@ pydantic==2.13.4
 
 # LangChain & community integrations
 langchain==1.3.4
+langchain-core==1.4.2
 langchain-community==0.4.2
+langchain-text-splitters==1.1.2
 langchain-groq==1.1.2
 langchain-chroma==1.0.0
+langchain-google-genai==4.2.4
+langchain-ollama>=0.3.0
+
+# Numerical / ML
+numpy==2.2.6
 
 # Vector store & search
 chromadb==1.5.9
