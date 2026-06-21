@@ -10,11 +10,15 @@ from langfuse import Langfuse, observe
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
-langfuse = Langfuse(
-    secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
-    public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
-    host=os.getenv("LANGFUSE_HOST"),
-)
+try:
+    langfuse = Langfuse(
+        secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
+        public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
+        host=os.getenv("LANGFUSE_HOST"),
+    )
+except Exception as _lf_err:
+    print(f"Warning: Langfuse init failed (observability disabled): {_lf_err}")
+    langfuse = None
 
 # LLM selection (Groq, Ollama, or Gemini)
 use_ollama = os.getenv("USE_OLLAMA", "false").lower() == "true"
@@ -115,10 +119,12 @@ def format_context(chunks: list[dict]) -> str:
     return "\n\n---\n\n".join(parts)
 
 def generate_answer(query: str, chunks: list[dict]) -> dict:
-    # Use fused_score or original score – no rerank score anymore
+    # RRF fused_score is mathematically capped at ~0.033 (1/61 per list),
+    # so we must check the original retrieval score (cosine sim or BM25)
+    # first. fused_score is used only when no 'score' field exists.
     relevant = [
         c for c in chunks
-        if c.get("fused_score", c.get("score", 0.0)) > 0.15
+        if c.get("score", c.get("fused_score", 0.0)) > 0.15
     ]
     if not relevant:
         return {
