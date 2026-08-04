@@ -1,0 +1,1097 @@
+DB_TAG: mysql
+SOURCE_URL: https://dev.mysql.com/doc/refman/8.0/en/explain.html
+DOC_NAME: mysql_explain
+---
+Skip to Main Content
+The world's most popular open source database
+Contact MySQL
+|
+Login
+|
+Register
+MySQL.com
+Downloads
+Documentation
+Developer Zone
+Developer Zone
+Downloads
+MySQL.com
+Documentation
+MySQL Server
+MySQL Enterprise
+Workbench
+InnoDB Cluster
+MySQL NDB Cluster
+Connectors
+More
+MySQL.com
+Downloads
+Developer Zone
+Section Menu:
+Documentation Home
+MySQL 8.0 Reference Manual
+Preface and Legal Notices
+General Information
+Installing MySQL
+Upgrading MySQL
+Downgrading MySQL
+Tutorial
+MySQL Programs
+MySQL Server Administration
+Security
+Backup and Recovery
+Optimization
+Language Structure
+Character Sets, Collations, Unicode
+Data Types
+Functions and Operators
+SQL Statements
+Data Definition Statements
+Atomic Data Definition Statement Support
+ALTER DATABASE Statement
+ALTER EVENT Statement
+ALTER FUNCTION Statement
+ALTER INSTANCE Statement
+ALTER LOGFILE GROUP Statement
+ALTER PROCEDURE Statement
+ALTER SERVER Statement
+ALTER TABLE Statement
+ALTER TABLE Partition Operations
+ALTER TABLE and Generated Columns
+ALTER TABLE Examples
+ALTER TABLESPACE Statement
+ALTER VIEW Statement
+CREATE DATABASE Statement
+CREATE EVENT Statement
+CREATE FUNCTION Statement
+CREATE INDEX Statement
+CREATE LOGFILE GROUP Statement
+CREATE PROCEDURE and CREATE FUNCTION Statements
+CREATE SERVER Statement
+CREATE SPATIAL REFERENCE SYSTEM Statement
+CREATE TABLE Statement
+Files Created by CREATE TABLE
+CREATE TEMPORARY TABLE Statement
+CREATE TABLE ... LIKE Statement
+CREATE TABLE ... SELECT Statement
+FOREIGN KEY Constraints
+CHECK Constraints
+Silent Column Specification Changes
+CREATE TABLE and Generated Columns
+Secondary Indexes and Generated Columns
+Invisible Columns
+Generated Invisible Primary Keys
+Setting NDB Comment Options
+CREATE TABLESPACE Statement
+CREATE TRIGGER Statement
+CREATE VIEW Statement
+DROP DATABASE Statement
+DROP EVENT Statement
+DROP FUNCTION Statement
+DROP INDEX Statement
+DROP LOGFILE GROUP Statement
+DROP PROCEDURE and DROP FUNCTION Statements
+DROP SERVER Statement
+DROP SPATIAL REFERENCE SYSTEM Statement
+DROP TABLE Statement
+DROP TABLESPACE Statement
+DROP TRIGGER Statement
+DROP VIEW Statement
+RENAME TABLE Statement
+TRUNCATE TABLE Statement
+Data Manipulation Statements
+CALL Statement
+DELETE Statement
+DO Statement
+EXCEPT Clause
+HANDLER Statement
+IMPORT TABLE Statement
+INSERT Statement
+INSERT ... SELECT Statement
+INSERT ... ON DUPLICATE KEY UPDATE Statement
+INSERT DELAYED Statement
+INTERSECT Clause
+LOAD DATA Statement
+LOAD XML Statement
+Parenthesized Query Expressions
+REPLACE Statement
+SELECT Statement
+SELECT ... INTO Statement
+JOIN Clause
+Set Operations with UNION, INTERSECT, and EXCEPT
+Subqueries
+The Subquery as Scalar Operand
+Comparisons Using Subqueries
+Subqueries with ANY, IN, or SOME
+Subqueries with ALL
+Row Subqueries
+Subqueries with EXISTS or NOT EXISTS
+Correlated Subqueries
+Derived Tables
+Lateral Derived Tables
+Subquery Errors
+Optimizing Subqueries
+Restrictions on Subqueries
+TABLE Statement
+UPDATE Statement
+UNION Clause
+VALUES Statement
+WITH (Common Table Expressions)
+Transactional and Locking Statements
+START TRANSACTION, COMMIT, and ROLLBACK Statements
+Statements That Cannot Be Rolled Back
+Statements That Cause an Implicit Commit
+SAVEPOINT, ROLLBACK TO SAVEPOINT, and RELEASE SAVEPOINT Statements
+LOCK INSTANCE FOR BACKUP and UNLOCK INSTANCE Statements
+LOCK TABLES and UNLOCK TABLES Statements
+SET TRANSACTION Statement
+XA Transactions
+XA Transaction SQL Statements
+XA Transaction States
+Restrictions on XA Transactions
+Replication Statements
+SQL Statements for Controlling Source Servers
+PURGE BINARY LOGS Statement
+RESET MASTER Statement
+SET sql_log_bin Statement
+SQL Statements for Controlling Replica Servers
+CHANGE MASTER TO Statement
+CHANGE REPLICATION FILTER Statement
+CHANGE REPLICATION SOURCE TO Statement
+RESET REPLICA Statement
+RESET SLAVE Statement
+START REPLICA Statement
+START SLAVE Statement
+STOP REPLICA Statement
+STOP SLAVE Statement
+SQL Statements for Controlling Group Replication
+START GROUP_REPLICATION Statement
+STOP GROUP_REPLICATION Statement
+Prepared Statements
+PREPARE Statement
+EXECUTE Statement
+DEALLOCATE PREPARE Statement
+Compound Statement Syntax
+BEGIN ... END Compound Statement
+Statement Labels
+DECLARE Statement
+Variables in Stored Programs
+Local Variable DECLARE Statement
+Local Variable Scope and Resolution
+Flow Control Statements
+CASE Statement
+IF Statement
+ITERATE Statement
+LEAVE Statement
+LOOP Statement
+REPEAT Statement
+RETURN Statement
+WHILE Statement
+Cursors
+Cursor CLOSE Statement
+Cursor DECLARE Statement
+Cursor FETCH Statement
+Cursor OPEN Statement
+Restrictions on Server-Side Cursors
+Condition Handling
+DECLARE ... CONDITION Statement
+DECLARE ... HANDLER Statement
+GET DIAGNOSTICS Statement
+RESIGNAL Statement
+SIGNAL Statement
+Scope Rules for Handlers
+The MySQL Diagnostics Area
+Condition Handling and OUT or INOUT Parameters
+Restrictions on Condition Handling
+Database Administration Statements
+Account Management Statements
+ALTER USER Statement
+CREATE ROLE Statement
+CREATE USER Statement
+DROP ROLE Statement
+DROP USER Statement
+GRANT Statement
+RENAME USER Statement
+REVOKE Statement
+SET DEFAULT ROLE Statement
+SET PASSWORD Statement
+SET ROLE Statement
+Resource Group Management Statements
+ALTER RESOURCE GROUP Statement
+CREATE RESOURCE GROUP Statement
+DROP RESOURCE GROUP Statement
+SET RESOURCE GROUP Statement
+Table Maintenance Statements
+ANALYZE TABLE Statement
+CHECK TABLE Statement
+CHECKSUM TABLE Statement
+OPTIMIZE TABLE Statement
+REPAIR TABLE Statement
+Component, Plugin, and Loadable Function Statements
+CREATE FUNCTION Statement for Loadable Functions
+DROP FUNCTION Statement for Loadable Functions
+INSTALL COMPONENT Statement
+INSTALL PLUGIN Statement
+UNINSTALL COMPONENT Statement
+UNINSTALL PLUGIN Statement
+CLONE Statement
+SET Statements
+SET Syntax for Variable Assignment
+SET CHARACTER SET Statement
+SET NAMES Statement
+SHOW Statements
+SHOW BINARY LOGS Statement
+SHOW BINLOG EVENTS Statement
+SHOW CHARACTER SET Statement
+SHOW COLLATION Statement
+SHOW COLUMNS Statement
+SHOW CREATE DATABASE Statement
+SHOW CREATE EVENT Statement
+SHOW CREATE FUNCTION Statement
+SHOW CREATE PROCEDURE Statement
+SHOW CREATE TABLE Statement
+SHOW CREATE TRIGGER Statement
+SHOW CREATE USER Statement
+SHOW CREATE VIEW Statement
+SHOW DATABASES Statement
+SHOW ENGINE Statement
+SHOW ENGINES Statement
+SHOW ERRORS Statement
+SHOW EVENTS Statement
+SHOW FUNCTION CODE Statement
+SHOW FUNCTION STATUS Statement
+SHOW GRANTS Statement
+SHOW INDEX Statement
+SHOW MASTER STATUS Statement
+SHOW OPEN TABLES Statement
+SHOW PLUGINS Statement
+SHOW PRIVILEGES Statement
+SHOW PROCEDURE CODE Statement
+SHOW PROCEDURE STATUS Statement
+SHOW PROCESSLIST Statement
+SHOW PROFILE Statement
+SHOW PROFILES Statement
+SHOW RELAYLOG EVENTS Statement
+SHOW REPLICAS Statement
+SHOW SLAVE HOSTS | SHOW REPLICAS Statement
+SHOW REPLICA STATUS Statement
+SHOW SLAVE | REPLICA STATUS Statement
+SHOW STATUS Statement
+SHOW TABLE STATUS Statement
+SHOW TABLES Statement
+SHOW TRIGGERS Statement
+SHOW VARIABLES Statement
+SHOW WARNINGS Statement
+Other Administrative Statements
+BINLOG Statement
+CACHE INDEX Statement
+FLUSH Statement
+KILL Statement
+LOAD INDEX INTO CACHE Statement
+RESET Statement
+RESET PERSIST Statement
+RESTART Statement
+SHUTDOWN Statement
+Utility Statements
+DESCRIBE Statement
+EXPLAIN Statement
+HELP Statement
+USE Statement
+MySQL Data Dictionary
+The InnoDB Storage Engine
+Alternative Storage Engines
+Replication
+Group Replication
+MySQL Shell
+Using MySQL as a Document Store
+InnoDB Cluster
+InnoDB ReplicaSet
+MySQL NDB Cluster 8.0
+Partitioning
+Stored Objects
+INFORMATION_SCHEMA Tables
+MySQL Performance Schema
+MySQL sys Schema
+Connectors and APIs
+MySQL Enterprise Edition
+MySQL Workbench
+MySQL on OCI Marketplace
+MySQL 8.0 Frequently Asked Questions
+Error Messages and Common Problems
+Indexes
+MySQL Glossary
+Related Documentation
+MySQL 8.0 Release Notes
+MySQL 8.0 Source Code Documentation
+Download
+this Manual
+PDF (US Ltr)
+- 43.2Mb
+PDF (A4)
+- 43.3Mb
+Man Pages (TGZ)
+- 295.2Kb
+Man Pages (Zip)
+- 400.4Kb
+Info (Gzip)
+- 4.3Mb
+Info (Zip)
+- 4.3Mb
+Excerpts from this Manual
+MySQL Backup and Recovery
+MySQL Globalization
+MySQL Information Schema
+MySQL Installation Guide
+Security in MySQL
+Starting and Stopping MySQL
+MySQL and Linux/Unix
+MySQL and Windows
+MySQL and macOS
+MySQL and Solaris
+Building MySQL from Source
+MySQL Restrictions and Limitations
+MySQL Partitioning
+MySQL Tutorial
+MySQL Performance Schema
+MySQL Replication
+Using the MySQL Yum Repository
+MySQL NDB Cluster 8.0
+version 8.0
+9.7
+current
+9.6
+9.5
+9.4
+9.3
+9.2
+9.1
+9.0
+8.4
+5.7
+8.0
+Japanese
+MySQL 8.0 Reference Manual
+/
+...
+/
+SQL Statements
+/
+Utility Statements
+/
+EXPLAIN Statement
+15.8.2 EXPLAIN Statement
+{EXPLAIN | DESCRIBE | DESC}
+tbl_name
+[
+col_name
+|
+wild
+]
+{EXPLAIN | DESCRIBE | DESC}
+[
+explain_type
+]
+{
+explainable_stmt
+| FOR CONNECTION
+connection_id
+}
+{EXPLAIN | DESCRIBE | DESC} ANALYZE [
+explain_type
+]
+select_stmt
+explain_type
+: {
+FORMAT =
+format_name
+}
+format_name
+: {
+TRADITIONAL
+| JSON
+| TREE
+}
+explainable_stmt
+: {
+select_stmt
+| TABLE ...
+| DELETE ...
+| INSERT ...
+| REPLACE ...
+| UPDATE ...
+}
+select_stmt
+:
+SELECT ...
+The
+DESCRIBE
+and
+EXPLAIN
+statements are synonyms. In
+practice, the
+DESCRIBE
+keyword is
+more often used to obtain information about table structure,
+whereas
+EXPLAIN
+is used to obtain a
+query execution plan (that is, an explanation of how MySQL would
+execute a query).
+The following discussion uses the
+DESCRIBE
+and
+EXPLAIN
+keywords in accordance with
+those uses, but the MySQL parser treats them as completely
+synonymous.
+Obtaining Table Structure Information
+Obtaining Execution Plan Information
+Obtaining Information with EXPLAIN ANALYZE
+Obtaining Table Structure Information
+DESCRIBE
+provides information
+about the columns in a table:
+mysql> DESCRIBE City;
++------------+----------+------+-----+---------+----------------+
+| Field      | Type     | Null | Key | Default | Extra          |
++------------+----------+------+-----+---------+----------------+
+| Id         | int(11)  | NO   | PRI | NULL    | auto_increment |
+| Name       | char(35) | NO   |     |         |                |
+| Country    | char(3)  | NO   | UNI |         |                |
+| District   | char(20) | YES  | MUL |         |                |
+| Population | int(11)  | NO   |     | 0       |                |
++------------+----------+------+-----+---------+----------------+
+DESCRIBE
+is a shortcut for
+SHOW COLUMNS
+. These statements
+also display information for views. The description for
+SHOW COLUMNS
+provides more
+information about the output columns. See
+Section 15.7.7.5, “SHOW COLUMNS Statement”
+.
+By default,
+DESCRIBE
+displays
+information about all columns in the table.
+col_name
+, if given, is the name of a
+column in the table. In this case, the statement displays
+information only for the named column.
+wild
+, if given, is a pattern string.
+It can contain the SQL
+%
+and
+_
+wildcard characters. In this case, the
+statement displays output only for the columns with names
+matching the string. There is no need to enclose the string
+within quotation marks unless it contains spaces or other
+special characters.
+The
+DESCRIBE
+statement is
+provided for compatibility with Oracle.
+The
+SHOW CREATE TABLE
+,
+SHOW TABLE STATUS
+, and
+SHOW INDEX
+statements also
+provide information about tables. See
+Section 15.7.7, “SHOW Statements”
+.
+The
+explain_format
+system
+variable, added in MySQL 8.0.32, has no effect on the output of
+EXPLAIN
+when used to obtain information about
+table columns.
+Obtaining Execution Plan Information
+The
+EXPLAIN
+statement provides
+information about how MySQL executes statements:
+EXPLAIN
+works with
+SELECT
+,
+DELETE
+,
+INSERT
+,
+REPLACE
+, and
+UPDATE
+statements. In MySQL
+8.0.19 and later, it also works with
+TABLE
+statements.
+When
+EXPLAIN
+is used with an
+explainable statement, MySQL displays information from the
+optimizer about the statement execution plan. That is, MySQL
+explains how it would process the statement, including
+information about how tables are joined and in which order.
+For information about using
+EXPLAIN
+to obtain execution
+plan information, see
+Section 10.8.2, “EXPLAIN Output Format”
+.
+When
+EXPLAIN
+is used with
+FOR CONNECTION
+connection_id
+rather
+than an explainable statement, it displays the execution
+plan for the statement executing in the named connection.
+See
+Section 10.8.4, “Obtaining Execution Plan Information for a Named Connection”
+.
+For explainable statements,
+EXPLAIN
+produces additional
+execution plan information that can be displayed using
+SHOW WARNINGS
+. See
+Section 10.8.3, “Extended EXPLAIN Output Format”
+.
+EXPLAIN
+is useful for
+examining queries involving partitioned tables. See
+Section 26.3.5, “Obtaining Information About Partitions”
+.
+The
+FORMAT
+option can be used to select
+the output format.
+TRADITIONAL
+presents
+the output in tabular format. This is the default if no
+FORMAT
+option is present.
+JSON
+format displays the information in
+JSON format. In MySQL 8.0.16 and later,
+TREE
+provides tree-like output with more
+precise descriptions of query handling than the
+TRADITIONAL
+format; it is the only format
+which shows hash join usage (see
+Section 10.2.1.4, “Hash Join Optimization”
+) and is always used for
+EXPLAIN ANALYZE
+.
+As of MySQL 8.0.32, the default output format used by
+EXPLAIN
+(that is, when it has no
+FORMAT
+option) is determined by the value
+of the
+explain_format
+system variable. The precise effects of this variable are
+described later in this section.
+For complex statements, the JSON output can be quite large;
+in particular, it can be difficult when reading it to pair
+the closing bracket and opening brackets; to cause the JSON
+structure's key, if it has one, to be repeated near the
+closing bracket, set
+end_markers_in_json=ON
+. You
+should be aware that while this makes the output easier to
+read, it also renders the JSON invalid, causing JSON
+functions to raise an error.
+EXPLAIN
+requires the same
+privileges required to execute the explained statement.
+Additionally,
+EXPLAIN
+also
+requires the
+SHOW VIEW
+privilege
+for any explained view.
+EXPLAIN ... FOR
+CONNECTION
+also requires the
+PROCESS
+privilege if the
+specified connection belongs to a different user.
+The
+explain_format
+system
+variable introduced in MySQL 8.0.32 determines the format of the
+output from
+EXPLAIN
+when used to display a
+query execution plan. This variable can take any of the values
+used with the
+FORMAT
+option, with the
+addition of
+DEFAULT
+as a synonym for
+TRADITIONAL
+. The following example uses the
+country
+table from the
+world
+database which can be obtained from
+MySQL: Other
+Downloads
+:
+mysql> USE world; # Make world the current database
+Database changed
+Checking the value of
+explain_format
+, we see
+that it has the default value, and that
+EXPLAIN
+(with no
+FORMAT
+option) therefore uses the traditional tabular output:
+mysql> SELECT @@explain_format;
++------------------+
+| @@explain_format |
++------------------+
+| TRADITIONAL      |
++------------------+
+1 row in set (0.00 sec)
+mysql> EXPLAIN SELECT Name FROM country WHERE Code Like 'A%';
++----+-------------+---------+------------+-------+---------------+---------+---------+------+------+----------+-------------+
+| id | select_type | table   | partitions | type  | possible_keys | key     | key_len | ref  | rows | filtered | Extra       |
++----+-------------+---------+------------+-------+---------------+---------+---------+------+------+----------+-------------+
+|  1 | SIMPLE      | country | NULL       | range | PRIMARY       | PRIMARY | 12      | NULL |   17 |   100.00 | Using where |
++----+-------------+---------+------------+-------+---------------+---------+---------+------+------+----------+-------------+
+1 row in set, 1 warning (0.00 sec)
+If we set the value of
+explain_format
+to
+TREE
+, then rerun the same
+EXPLAIN
+statement, the output uses the
+tree-like format:
+mysql> SET @@explain_format=TREE;
+Query OK, 0 rows affected (0.00 sec)
+mysql> SELECT @@explain_format;
++------------------+
+| @@explain_format |
++------------------+
+| TREE             |
++------------------+
+1 row in set (0.00 sec)
+mysql> EXPLAIN SELECT Name FROM country WHERE Code LIKE 'A%';
++--------------------------------------------------------------------------------------------------------------+
+| EXPLAIN                                                                                                      |
++--------------------------------------------------------------------------------------------------------------+
+| -> Filter: (country.`Code` like 'A%')  (cost=3.67 rows=17)
+-> Index range scan on country using PRIMARY over ('A' <= Code <= 'A????????')  (cost=3.67 rows=17)  |
++--------------------------------------------------------------------------------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+As stated previously, the
+FORMAT
+option
+overrides this setting. Executing the same
+EXPLAIN
+statement using
+FORMAT=JSON
+instead of
+FORMAT=TREE
+shows that this is the case:
+mysql> EXPLAIN FORMAT=JSON SELECT Name FROM country WHERE Code LIKE 'A%';
++------------------------------------------------------------------------------+
+| EXPLAIN                                                                      |
++------------------------------------------------------------------------------+
+| {
+"query_block": {
+"select_id": 1,
+"cost_info": {
+"query_cost": "3.67"
+},
+"table": {
+"table_name": "country",
+"access_type": "range",
+"possible_keys": [
+"PRIMARY"
+],
+"key": "PRIMARY",
+"used_key_parts": [
+"Code"
+],
+"key_length": "12",
+"rows_examined_per_scan": 17,
+"rows_produced_per_join": 17,
+"filtered": "100.00",
+"cost_info": {
+"read_cost": "1.97",
+"eval_cost": "1.70",
+"prefix_cost": "3.67",
+"data_read_per_join": "16K"
+},
+"used_columns": [
+"Code",
+"Name"
+],
+"attached_condition": "(`world`.`country`.`Code` like 'A%')"
+}
+}
+}                                                                              |
++------------------------------------------------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+To return the default output of
+EXPLAIN
+to
+the tabular format, set
+explain_format
+to
+TRADITIONAL
+. Alternatively, you can set it to
+DEFAULT
+, which has the same effect, as shown
+here:
+mysql> SET @@explain_format=DEFAULT;
+Query OK, 0 rows affected (0.00 sec)
+mysql> SELECT @@explain_format;
++------------------+
+| @@explain_format |
++------------------+
+| TRADITIONAL      |
++------------------+
+1 row in set (0.00 sec)
+With the help of
+EXPLAIN
+, you can
+see where you should add indexes to tables so that the statement
+executes faster by using indexes to find rows. You can also use
+EXPLAIN
+to check whether the
+optimizer joins the tables in an optimal order. To give a hint
+to the optimizer to use a join order corresponding to the order
+in which the tables are named in a
+SELECT
+statement, begin the
+statement with
+SELECT STRAIGHT_JOIN
+rather
+than just
+SELECT
+. (See
+Section 15.2.13, “SELECT Statement”
+.)
+The optimizer trace may sometimes provide information
+complementary to that of
+EXPLAIN
+.
+However, the optimizer trace format and content are subject to
+change between versions. For details, see
+Section 10.15, “Tracing the Optimizer”
+.
+If you have a problem with indexes not being used when you
+believe that they should be, run
+ANALYZE
+TABLE
+to update table statistics, such as cardinality
+of keys, that can affect the choices the optimizer makes. See
+Section 15.7.3.1, “ANALYZE TABLE Statement”
+.
+Note
+MySQL Workbench has a Visual Explain capability that provides a
+visual representation of
+EXPLAIN
+output. See
+Tutorial: Using Explain to Improve Query Performance
+.
+Obtaining Information with EXPLAIN ANALYZE
+MySQL 8.0.18 introduces
+EXPLAIN ANALYZE
+,
+which runs a statement and produces
+EXPLAIN
+output along with timing and additional, iterator-based,
+information about how the optimizer's expectations matched
+the actual execution. For each iterator, the following
+information is provided:
+Estimated execution cost
+(Some iterators are not accounted for by the cost model, and
+so are not included in the estimate.)
+Estimated number of returned rows
+Time to return first row
+Time spent executing this iterator (including child
+iterators, but not parent iterators), in milliseconds.
+(When there are multiple loops, this figure shows the
+average time per loop.)
+Number of rows returned by the iterator
+Number of loops
+The query execution information is displayed using the
+TREE
+output format, in which nodes represent
+iterators.
+EXPLAIN ANALYZE
+always uses the
+TREE
+output format. In MySQL 8.0.21 and
+later, this can optionally be specified explicitly using
+FORMAT=TREE
+; formats other than
+TREE
+remain unsupported.
+EXPLAIN ANALYZE
+can be used with
+SELECT
+statements, as well as
+with multi-table
+UPDATE
+and
+DELETE
+statements. Beginning with
+MySQL 8.0.19, it can also be used with
+TABLE
+statements.
+Beginning with MySQL 8.0.20, you can terminate this statement
+using
+KILL QUERY
+or
+CTRL-C
+.
+EXPLAIN ANALYZE
+cannot be used with
+FOR CONNECTION
+.
+Example output:
+mysql> EXPLAIN ANALYZE SELECT * FROM t1 JOIN t2 ON (t1.c1 = t2.c2)\G
+*************************** 1. row ***************************
+EXPLAIN: -> Inner hash join (t2.c2 = t1.c1)  (cost=4.70 rows=6)
+(actual time=0.032..0.035 rows=6 loops=1)
+-> Table scan on t2  (cost=0.06 rows=6)
+(actual time=0.003..0.005 rows=6 loops=1)
+-> Hash
+-> Table scan on t1  (cost=0.85 rows=6)
+(actual time=0.018..0.022 rows=6 loops=1)
+mysql> EXPLAIN ANALYZE SELECT * FROM t3 WHERE i > 8\G
+*************************** 1. row ***************************
+EXPLAIN: -> Filter: (t3.i > 8)  (cost=1.75 rows=5)
+(actual time=0.019..0.021 rows=6 loops=1)
+-> Table scan on t3  (cost=1.75 rows=15)
+(actual time=0.017..0.019 rows=15 loops=1)
+mysql> EXPLAIN ANALYZE SELECT * FROM t3 WHERE pk > 17\G
+*************************** 1. row ***************************
+EXPLAIN: -> Filter: (t3.pk > 17)  (cost=1.26 rows=5)
+(actual time=0.013..0.016 rows=5 loops=1)
+-> Index range scan on t3 using PRIMARY  (cost=1.26 rows=5)
+(actual time=0.012..0.014 rows=5 loops=1)
+The tables used in the example output were created by the
+statements shown here:
+CREATE TABLE t1 (
+c1 INTEGER DEFAULT NULL,
+c2 INTEGER DEFAULT NULL
+);
+CREATE TABLE t2 (
+c1 INTEGER DEFAULT NULL,
+c2 INTEGER DEFAULT NULL
+);
+CREATE TABLE t3 (
+pk INTEGER NOT NULL PRIMARY KEY,
+i INTEGER DEFAULT NULL
+);
+Values shown for
+actual time
+in the output of
+this statement are expressed in milliseconds.
+As of MySQL 8.0.32, the
+explain_format
+system variable
+has the following effects on
+EXPLAIN ANALYZE
+:
+If the value of this variable is
+TRADITIONAL
+or
+TREE
+(or the synonym
+DEFAULT
+),
+EXPLAIN ANALYZE
+uses the
+TREE
+format. This ensures that this
+statement continues to use the
+TREE
+format by default, as it did prior to the introduction of
+explain_format
+.
+If the value of
+explain_format
+is
+JSON
+,
+EXPLAIN ANALYZE
+returns an error unless
+FORMAT=TREE
+is
+specified as part of the statement. This is due to the fact
+that
+EXPLAIN ANALYZE
+supports only the
+TREE
+output format.
+We illustrate the behavior described in the second point here,
+re-using the last
+EXPLAIN ANALYZE
+statement
+from the previous example:
+mysql> SET @@explain_format=JSON;
+Query OK, 0 rows affected (0.00 sec)
+mysql> SELECT @@explain_format;
++------------------+
+| @@explain_format |
++------------------+
+| JSON             |
++------------------+
+1 row in set (0.00 sec)
+mysql> EXPLAIN ANALYZE SELECT * FROM t3 WHERE pk > 17\G
+ERROR 1235 (42000): This version of MySQL doesn't yet support 'EXPLAIN ANALYZE with JSON format'
+mysql> EXPLAIN ANALYZE FORMAT=TRADITIONAL SELECT * FROM t3 WHERE pk > 17\G
+ERROR 1235 (42000): This version of MySQL doesn't yet support 'EXPLAIN ANALYZE with TRADITIONAL format'
+mysql> EXPLAIN ANALYZE FORMAT=TREE SELECT * FROM t3 WHERE pk > 17\G
+*************************** 1. row ***************************
+EXPLAIN: -> Filter: (t3.pk > 17)  (cost=1.26 rows=5)
+(actual time=0.013..0.016 rows=5 loops=1)
+-> Index range scan on t3 using PRIMARY  (cost=1.26 rows=5)
+(actual time=0.012..0.014 rows=5 loops=1)
+Using
+FORMAT=TRADITIONAL
+or
+FORMAT=JSON
+with
+EXPLAIN
+ANALYZE
+always raises an error, regardless of the
+value of
+explain_format
+.
+Beginning with MySQL 8.0.33, numbers in the output of
+EXPLAIN ANALYZE
+and
+EXPLAIN
+FORMAT=TREE
+are formatted according to the following
+rules:
+Numbers in the range 0.001-999999.5 are printed as decimal
+numbers.
+Decimal numbers less than 1000 have three significant
+digits; the remainder have four, five, or six.
+Numbers outside the range 0.001-999999.5 are printed in
+engineering format. Examples of such values are
+1.23e+9
+and
+934e-6
+.
+No trailing zeros are printed. For example, we print
+2.3
+rather than
+2.30
+,
+and
+1.2e+6
+rather than
+1.20e+6
+.
+Numbers less than
+1e-12
+are printed as
+0
+.
+PREV
+HOME
+UP
+NEXT
+Related Documentation
+MySQL 8.0 Release Notes
+MySQL 8.0 Source Code Documentation
+Download
+this Manual
+PDF (US Ltr)
+- 43.2Mb
+PDF (A4)
+- 43.3Mb
+Man Pages (TGZ)
+- 295.2Kb
+Man Pages (Zip)
+- 400.4Kb
+Info (Gzip)
+- 4.3Mb
+Info (Zip)
+- 4.3Mb
+Excerpts from this Manual
+MySQL Backup and Recovery
+MySQL Globalization
+MySQL Information Schema
+MySQL Installation Guide
+Security in MySQL
+Starting and Stopping MySQL
+MySQL and Linux/Unix
+MySQL and Windows
+MySQL and macOS
+MySQL and Solaris
+Building MySQL from Source
+MySQL Restrictions and Limitations
+MySQL Partitioning
+MySQL Tutorial
+MySQL Performance Schema
+MySQL Replication
+Using the MySQL Yum Repository
+MySQL NDB Cluster 8.0
+Contact MySQL Sales
+USA/Canada: +1-866-221-0634
+(
+More Countries »
+)
+© 2026 Oracle
+Products
+MySQL HeatWave
+MySQL Enterprise Edition
+MySQL Standard Edition
+MySQL Classic Edition
+MySQL Cluster CGE
+MySQL Embedded (OEM/ISV)
+Services
+Training
+Certification
+Support
+Downloads
+MySQL Community Server
+MySQL NDB Cluster
+MySQL Shell
+MySQL Router
+MySQL Workbench
+Documentation
+MySQL Reference Manual
+MySQL Workbench
+MySQL NDB Cluster
+MySQL Connectors
+Topic Guides
+About MySQL
+Contact Us
+Blogs
+How to Buy
+Partners
+Job Opportunities
+Site Map
+© 2026 Oracle
+Privacy
+/
+Do Not Sell My Info
+|
+Terms of Use
+|
+Trademark Policy
+|

@@ -1,0 +1,781 @@
+DB_TAG: mysql
+SOURCE_URL: https://dev.mysql.com/doc/refman/8.0/en/optimize-table.html
+DOC_NAME: mysql_optimize
+---
+Skip to Main Content
+The world's most popular open source database
+Contact MySQL
+|
+Login
+|
+Register
+MySQL.com
+Downloads
+Documentation
+Developer Zone
+Developer Zone
+Downloads
+MySQL.com
+Documentation
+MySQL Server
+MySQL Enterprise
+Workbench
+InnoDB Cluster
+MySQL NDB Cluster
+Connectors
+More
+MySQL.com
+Downloads
+Developer Zone
+Section Menu:
+Documentation Home
+MySQL 8.0 Reference Manual
+Preface and Legal Notices
+General Information
+Installing MySQL
+Upgrading MySQL
+Downgrading MySQL
+Tutorial
+MySQL Programs
+MySQL Server Administration
+Security
+Backup and Recovery
+Optimization
+Language Structure
+Character Sets, Collations, Unicode
+Data Types
+Functions and Operators
+SQL Statements
+Data Definition Statements
+Atomic Data Definition Statement Support
+ALTER DATABASE Statement
+ALTER EVENT Statement
+ALTER FUNCTION Statement
+ALTER INSTANCE Statement
+ALTER LOGFILE GROUP Statement
+ALTER PROCEDURE Statement
+ALTER SERVER Statement
+ALTER TABLE Statement
+ALTER TABLE Partition Operations
+ALTER TABLE and Generated Columns
+ALTER TABLE Examples
+ALTER TABLESPACE Statement
+ALTER VIEW Statement
+CREATE DATABASE Statement
+CREATE EVENT Statement
+CREATE FUNCTION Statement
+CREATE INDEX Statement
+CREATE LOGFILE GROUP Statement
+CREATE PROCEDURE and CREATE FUNCTION Statements
+CREATE SERVER Statement
+CREATE SPATIAL REFERENCE SYSTEM Statement
+CREATE TABLE Statement
+Files Created by CREATE TABLE
+CREATE TEMPORARY TABLE Statement
+CREATE TABLE ... LIKE Statement
+CREATE TABLE ... SELECT Statement
+FOREIGN KEY Constraints
+CHECK Constraints
+Silent Column Specification Changes
+CREATE TABLE and Generated Columns
+Secondary Indexes and Generated Columns
+Invisible Columns
+Generated Invisible Primary Keys
+Setting NDB Comment Options
+CREATE TABLESPACE Statement
+CREATE TRIGGER Statement
+CREATE VIEW Statement
+DROP DATABASE Statement
+DROP EVENT Statement
+DROP FUNCTION Statement
+DROP INDEX Statement
+DROP LOGFILE GROUP Statement
+DROP PROCEDURE and DROP FUNCTION Statements
+DROP SERVER Statement
+DROP SPATIAL REFERENCE SYSTEM Statement
+DROP TABLE Statement
+DROP TABLESPACE Statement
+DROP TRIGGER Statement
+DROP VIEW Statement
+RENAME TABLE Statement
+TRUNCATE TABLE Statement
+Data Manipulation Statements
+CALL Statement
+DELETE Statement
+DO Statement
+EXCEPT Clause
+HANDLER Statement
+IMPORT TABLE Statement
+INSERT Statement
+INSERT ... SELECT Statement
+INSERT ... ON DUPLICATE KEY UPDATE Statement
+INSERT DELAYED Statement
+INTERSECT Clause
+LOAD DATA Statement
+LOAD XML Statement
+Parenthesized Query Expressions
+REPLACE Statement
+SELECT Statement
+SELECT ... INTO Statement
+JOIN Clause
+Set Operations with UNION, INTERSECT, and EXCEPT
+Subqueries
+The Subquery as Scalar Operand
+Comparisons Using Subqueries
+Subqueries with ANY, IN, or SOME
+Subqueries with ALL
+Row Subqueries
+Subqueries with EXISTS or NOT EXISTS
+Correlated Subqueries
+Derived Tables
+Lateral Derived Tables
+Subquery Errors
+Optimizing Subqueries
+Restrictions on Subqueries
+TABLE Statement
+UPDATE Statement
+UNION Clause
+VALUES Statement
+WITH (Common Table Expressions)
+Transactional and Locking Statements
+START TRANSACTION, COMMIT, and ROLLBACK Statements
+Statements That Cannot Be Rolled Back
+Statements That Cause an Implicit Commit
+SAVEPOINT, ROLLBACK TO SAVEPOINT, and RELEASE SAVEPOINT Statements
+LOCK INSTANCE FOR BACKUP and UNLOCK INSTANCE Statements
+LOCK TABLES and UNLOCK TABLES Statements
+SET TRANSACTION Statement
+XA Transactions
+XA Transaction SQL Statements
+XA Transaction States
+Restrictions on XA Transactions
+Replication Statements
+SQL Statements for Controlling Source Servers
+PURGE BINARY LOGS Statement
+RESET MASTER Statement
+SET sql_log_bin Statement
+SQL Statements for Controlling Replica Servers
+CHANGE MASTER TO Statement
+CHANGE REPLICATION FILTER Statement
+CHANGE REPLICATION SOURCE TO Statement
+RESET REPLICA Statement
+RESET SLAVE Statement
+START REPLICA Statement
+START SLAVE Statement
+STOP REPLICA Statement
+STOP SLAVE Statement
+SQL Statements for Controlling Group Replication
+START GROUP_REPLICATION Statement
+STOP GROUP_REPLICATION Statement
+Prepared Statements
+PREPARE Statement
+EXECUTE Statement
+DEALLOCATE PREPARE Statement
+Compound Statement Syntax
+BEGIN ... END Compound Statement
+Statement Labels
+DECLARE Statement
+Variables in Stored Programs
+Local Variable DECLARE Statement
+Local Variable Scope and Resolution
+Flow Control Statements
+CASE Statement
+IF Statement
+ITERATE Statement
+LEAVE Statement
+LOOP Statement
+REPEAT Statement
+RETURN Statement
+WHILE Statement
+Cursors
+Cursor CLOSE Statement
+Cursor DECLARE Statement
+Cursor FETCH Statement
+Cursor OPEN Statement
+Restrictions on Server-Side Cursors
+Condition Handling
+DECLARE ... CONDITION Statement
+DECLARE ... HANDLER Statement
+GET DIAGNOSTICS Statement
+RESIGNAL Statement
+SIGNAL Statement
+Scope Rules for Handlers
+The MySQL Diagnostics Area
+Condition Handling and OUT or INOUT Parameters
+Restrictions on Condition Handling
+Database Administration Statements
+Account Management Statements
+ALTER USER Statement
+CREATE ROLE Statement
+CREATE USER Statement
+DROP ROLE Statement
+DROP USER Statement
+GRANT Statement
+RENAME USER Statement
+REVOKE Statement
+SET DEFAULT ROLE Statement
+SET PASSWORD Statement
+SET ROLE Statement
+Resource Group Management Statements
+ALTER RESOURCE GROUP Statement
+CREATE RESOURCE GROUP Statement
+DROP RESOURCE GROUP Statement
+SET RESOURCE GROUP Statement
+Table Maintenance Statements
+ANALYZE TABLE Statement
+CHECK TABLE Statement
+CHECKSUM TABLE Statement
+OPTIMIZE TABLE Statement
+REPAIR TABLE Statement
+Component, Plugin, and Loadable Function Statements
+CREATE FUNCTION Statement for Loadable Functions
+DROP FUNCTION Statement for Loadable Functions
+INSTALL COMPONENT Statement
+INSTALL PLUGIN Statement
+UNINSTALL COMPONENT Statement
+UNINSTALL PLUGIN Statement
+CLONE Statement
+SET Statements
+SET Syntax for Variable Assignment
+SET CHARACTER SET Statement
+SET NAMES Statement
+SHOW Statements
+SHOW BINARY LOGS Statement
+SHOW BINLOG EVENTS Statement
+SHOW CHARACTER SET Statement
+SHOW COLLATION Statement
+SHOW COLUMNS Statement
+SHOW CREATE DATABASE Statement
+SHOW CREATE EVENT Statement
+SHOW CREATE FUNCTION Statement
+SHOW CREATE PROCEDURE Statement
+SHOW CREATE TABLE Statement
+SHOW CREATE TRIGGER Statement
+SHOW CREATE USER Statement
+SHOW CREATE VIEW Statement
+SHOW DATABASES Statement
+SHOW ENGINE Statement
+SHOW ENGINES Statement
+SHOW ERRORS Statement
+SHOW EVENTS Statement
+SHOW FUNCTION CODE Statement
+SHOW FUNCTION STATUS Statement
+SHOW GRANTS Statement
+SHOW INDEX Statement
+SHOW MASTER STATUS Statement
+SHOW OPEN TABLES Statement
+SHOW PLUGINS Statement
+SHOW PRIVILEGES Statement
+SHOW PROCEDURE CODE Statement
+SHOW PROCEDURE STATUS Statement
+SHOW PROCESSLIST Statement
+SHOW PROFILE Statement
+SHOW PROFILES Statement
+SHOW RELAYLOG EVENTS Statement
+SHOW REPLICAS Statement
+SHOW SLAVE HOSTS | SHOW REPLICAS Statement
+SHOW REPLICA STATUS Statement
+SHOW SLAVE | REPLICA STATUS Statement
+SHOW STATUS Statement
+SHOW TABLE STATUS Statement
+SHOW TABLES Statement
+SHOW TRIGGERS Statement
+SHOW VARIABLES Statement
+SHOW WARNINGS Statement
+Other Administrative Statements
+BINLOG Statement
+CACHE INDEX Statement
+FLUSH Statement
+KILL Statement
+LOAD INDEX INTO CACHE Statement
+RESET Statement
+RESET PERSIST Statement
+RESTART Statement
+SHUTDOWN Statement
+Utility Statements
+DESCRIBE Statement
+EXPLAIN Statement
+HELP Statement
+USE Statement
+MySQL Data Dictionary
+The InnoDB Storage Engine
+Alternative Storage Engines
+Replication
+Group Replication
+MySQL Shell
+Using MySQL as a Document Store
+InnoDB Cluster
+InnoDB ReplicaSet
+MySQL NDB Cluster 8.0
+Partitioning
+Stored Objects
+INFORMATION_SCHEMA Tables
+MySQL Performance Schema
+MySQL sys Schema
+Connectors and APIs
+MySQL Enterprise Edition
+MySQL Workbench
+MySQL on OCI Marketplace
+MySQL 8.0 Frequently Asked Questions
+Error Messages and Common Problems
+Indexes
+MySQL Glossary
+Related Documentation
+MySQL 8.0 Release Notes
+MySQL 8.0 Source Code Documentation
+Download
+this Manual
+PDF (US Ltr)
+- 43.2Mb
+PDF (A4)
+- 43.3Mb
+Man Pages (TGZ)
+- 295.2Kb
+Man Pages (Zip)
+- 400.4Kb
+Info (Gzip)
+- 4.3Mb
+Info (Zip)
+- 4.3Mb
+Excerpts from this Manual
+MySQL Backup and Recovery
+MySQL Globalization
+MySQL Information Schema
+MySQL Installation Guide
+Security in MySQL
+Starting and Stopping MySQL
+MySQL and Linux/Unix
+MySQL and Windows
+MySQL and macOS
+MySQL and Solaris
+Building MySQL from Source
+MySQL Restrictions and Limitations
+MySQL Partitioning
+MySQL Tutorial
+MySQL Performance Schema
+MySQL Replication
+Using the MySQL Yum Repository
+MySQL NDB Cluster 8.0
+version 8.0
+9.7
+current
+9.6
+9.5
+9.4
+9.3
+9.2
+9.1
+9.0
+8.4
+5.7
+8.0
+Japanese
+MySQL 8.0 Reference Manual
+/
+...
+/
+SQL Statements
+/
+Database Administration Statements
+/
+Table Maintenance Statements
+/
+OPTIMIZE TABLE Statement
+15.7.3.4 OPTIMIZE TABLE Statement
+OPTIMIZE [NO_WRITE_TO_BINLOG | LOCAL]
+TABLE
+tbl_name
+[,
+tbl_name
+] ...
+OPTIMIZE TABLE
+reorganizes the
+physical storage of table data and associated index data, to
+reduce storage space and improve I/O efficiency when accessing
+the table. The exact changes made to each table depend on the
+storage engine
+used
+by that table.
+Use
+OPTIMIZE TABLE
+in these
+cases, depending on the type of table:
+After doing substantial insert, update, or delete operations
+on an
+InnoDB
+table that has its own
+.ibd file
+because it
+was created with the
+innodb_file_per_table
+option enabled. The table and indexes are reorganized, and
+disk space can be reclaimed for use by the operating system.
+After doing substantial insert, update, or delete operations
+on columns that are part of a
+FULLTEXT
+index in an
+InnoDB
+table. Set the
+configuration option
+innodb_optimize_fulltext_only=1
+first. To keep the index maintenance period to a reasonable
+time, set the
+innodb_ft_num_word_optimize
+option to specify how many words to update in the search
+index, and run a sequence of
+OPTIMIZE
+TABLE
+statements until the search index is fully
+updated.
+After deleting a large part of a
+MyISAM
+or
+ARCHIVE
+table, or making many changes
+to a
+MyISAM
+or
+ARCHIVE
+table with variable-length rows (tables that have
+VARCHAR
+,
+VARBINARY
+,
+BLOB
+, or
+TEXT
+columns). Deleted rows
+are maintained in a linked list and subsequent
+INSERT
+operations reuse old
+row positions. You can use
+OPTIMIZE
+TABLE
+to reclaim the unused space and to
+defragment the data file. After extensive changes to a
+table, this statement may also improve performance of
+statements that use the table, sometimes significantly.
+This statement requires
+SELECT
+and
+INSERT
+privileges for the
+table.
+OPTIMIZE TABLE
+works for
+InnoDB
+,
+MyISAM
+, and
+ARCHIVE
+tables.
+OPTIMIZE TABLE
+is also supported
+for dynamic columns of in-memory
+NDB
+tables. It does not work for
+fixed-width columns of in-memory tables, nor does it work for
+Disk Data tables. The performance of
+OPTIMIZE
+on NDB Cluster tables can be tuned using
+--ndb-optimization-delay
+, which
+controls the length of time to wait between processing batches
+of rows by
+OPTIMIZE TABLE
+. For
+more information, see
+Section 25.2.7.11, “Previous NDB Cluster Issues Resolved in NDB Cluster 8.0”
+.
+For NDB Cluster tables,
+OPTIMIZE
+TABLE
+can be interrupted by (for example) killing the
+SQL thread performing the
+OPTIMIZE
+operation.
+By default,
+OPTIMIZE TABLE
+does
+not
+work for tables created using any other
+storage engine and returns a result indicating this lack of
+support. You can make
+OPTIMIZE
+TABLE
+work for other storage engines by starting
+mysqld
+with the
+--skip-new
+option. In this case,
+OPTIMIZE TABLE
+is just mapped to
+ALTER TABLE
+.
+This statement does not work with views.
+OPTIMIZE TABLE
+is supported for
+partitioned tables. For information about using this statement
+with partitioned tables and table partitions, see
+Section 26.3.4, “Maintenance of Partitions”
+.
+By default, the server writes
+OPTIMIZE
+TABLE
+statements to the binary log so that they
+replicate to replicas. To suppress logging, specify the optional
+NO_WRITE_TO_BINLOG
+keyword or its alias
+LOCAL
+.
+OPTIMIZE TABLE Output
+InnoDB Details
+MyISAM Details
+Other Considerations
+OPTIMIZE TABLE Output
+OPTIMIZE TABLE
+returns a result
+set with the columns shown in the following table.
+Column
+Value
+Table
+The table name
+Op
+Always
+optimize
+Msg_type
+status
+,
+error
+,
+info
+,
+note
+, or
+warning
+Msg_text
+An informational message
+OPTIMIZE TABLE
+table catches
+and throws any errors that occur while copying table
+statistics from the old file to the newly created file. For
+example. if the user ID of the owner of the
+.MYD
+or
+.MYI
+file is
+different from the user ID of the
+mysqld
+process,
+OPTIMIZE TABLE
+generates a "cannot change ownership of the file" error unless
+mysqld
+is started by the
+root
+user.
+InnoDB Details
+For
+InnoDB
+tables,
+OPTIMIZE TABLE
+is mapped to
+ALTER TABLE ...
+FORCE
+, which rebuilds the table to update index
+statistics and free unused space in the clustered index. This
+is displayed in the output of
+OPTIMIZE
+TABLE
+when you run it on an
+InnoDB
+table, as shown here:
+mysql> OPTIMIZE TABLE foo;
++----------+----------+----------+-------------------------------------------------------------------+
+| Table    | Op       | Msg_type | Msg_text                                                          |
++----------+----------+----------+-------------------------------------------------------------------+
+| test.foo | optimize | note     | Table does not support optimize, doing recreate + analyze instead |
+| test.foo | optimize | status   | OK                                                                |
++----------+----------+----------+-------------------------------------------------------------------+
+OPTIMIZE TABLE
+uses
+online DDL
+for
+regular and partitioned
+InnoDB
+tables,
+which reduces downtime for concurrent DML operations. The
+table rebuild triggered by
+OPTIMIZE
+TABLE
+is completed in place. An exclusive table lock
+is only taken briefly during the prepare phase and the commit
+phase of the operation. During the prepare phase, metadata is
+updated and an intermediate table is created. During the
+commit phase, table metadata changes are committed.
+OPTIMIZE TABLE
+rebuilds the
+table using the table copy method under the following
+conditions:
+When the
+old_alter_table
+system variable is enabled.
+When the server is started with the
+--skip-new
+option.
+OPTIMIZE TABLE
+using
+online DDL
+is not
+supported for
+InnoDB
+tables that contain
+FULLTEXT
+indexes. The table copy method is
+used instead.
+InnoDB
+stores data using a page-allocation
+method and does not suffer from fragmentation in the same way
+that legacy storage engines (such as
+MyISAM
+) do. When considering whether or not
+to run optimize, consider the workload of transactions that
+your server is expected to process:
+Some level of fragmentation is expected.
+InnoDB
+only fills
+pages
+93% full, to
+leave room for updates without having to split pages.
+Delete operations might leave gaps that leave pages less
+filled than desired, which could make it worthwhile to
+optimize the table.
+Updates to rows usually rewrite the data within the same
+page, depending on the data type and row format, when
+sufficient space is available. See
+Section 17.9.1.5, “How Compression Works for InnoDB Tables”
+and
+Section 17.10, “InnoDB Row Formats”
+.
+High-concurrency workloads might leave gaps in indexes
+over time, as
+InnoDB
+retains multiple
+versions of the same data due through its
+MVCC
+mechanism. See
+Section 17.3, “InnoDB Multi-Versioning”
+.
+MyISAM Details
+For
+MyISAM
+tables,
+OPTIMIZE TABLE
+works as
+follows:
+If the table has deleted or split rows, repair the table.
+If the index pages are not sorted, sort them.
+If the table's statistics are not up to date (and the
+repair could not be accomplished by sorting the index),
+update them.
+Other Considerations
+OPTIMIZE TABLE
+is performed
+online for regular and partitioned
+InnoDB
+tables. Otherwise, MySQL
+locks
+the table
+during the time
+OPTIMIZE
+TABLE
+is running.
+OPTIMIZE TABLE
+does not sort
+R-tree indexes, such as spatial indexes on
+POINT
+columns. (Bug #23578)
+PREV
+HOME
+UP
+NEXT
+Related Documentation
+MySQL 8.0 Release Notes
+MySQL 8.0 Source Code Documentation
+Download
+this Manual
+PDF (US Ltr)
+- 43.2Mb
+PDF (A4)
+- 43.3Mb
+Man Pages (TGZ)
+- 295.2Kb
+Man Pages (Zip)
+- 400.4Kb
+Info (Gzip)
+- 4.3Mb
+Info (Zip)
+- 4.3Mb
+Excerpts from this Manual
+MySQL Backup and Recovery
+MySQL Globalization
+MySQL Information Schema
+MySQL Installation Guide
+Security in MySQL
+Starting and Stopping MySQL
+MySQL and Linux/Unix
+MySQL and Windows
+MySQL and macOS
+MySQL and Solaris
+Building MySQL from Source
+MySQL Restrictions and Limitations
+MySQL Partitioning
+MySQL Tutorial
+MySQL Performance Schema
+MySQL Replication
+Using the MySQL Yum Repository
+MySQL NDB Cluster 8.0
+Contact MySQL Sales
+USA/Canada: +1-866-221-0634
+(
+More Countries »
+)
+© 2026 Oracle
+Products
+MySQL HeatWave
+MySQL Enterprise Edition
+MySQL Standard Edition
+MySQL Classic Edition
+MySQL Cluster CGE
+MySQL Embedded (OEM/ISV)
+Services
+Training
+Certification
+Support
+Downloads
+MySQL Community Server
+MySQL NDB Cluster
+MySQL Shell
+MySQL Router
+MySQL Workbench
+Documentation
+MySQL Reference Manual
+MySQL Workbench
+MySQL NDB Cluster
+MySQL Connectors
+Topic Guides
+About MySQL
+Contact Us
+Blogs
+How to Buy
+Partners
+Job Opportunities
+Site Map
+© 2026 Oracle
+Privacy
+/
+Do Not Sell My Info
+|
+Terms of Use
+|
+Trademark Policy
+|

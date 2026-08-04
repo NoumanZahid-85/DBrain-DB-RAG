@@ -1,0 +1,157 @@
+DB_TAG: mysql
+SOURCE_URL: https://dev.mysql.com/doc/refman/8.0/en/replication.html
+DOC_NAME: mysql_replication
+---
+Chapter 19 Replication
+Table of Contents
+19.1 Configuring Replication
+19.1.1 Binary Log File Position Based Replication Configuration Overview
+19.1.2 Setting Up Binary Log File Position Based Replication
+19.1.3 Replication with Global Transaction Identifiers
+19.1.4 Changing GTID Mode on Online Servers
+19.1.5 MySQL Multi-Source Replication
+19.1.6 Replication and Binary Logging Options and Variables
+19.1.7 Common Replication Administration Tasks
+19.2 Replication Implementation
+19.2.1 Replication Formats
+19.2.2 Replication Channels
+19.2.3 Replication Threads
+19.2.4 Relay Log and Replication Metadata Repositories
+19.2.5 How Servers Evaluate Replication Filtering Rules
+19.3 Replication Security
+19.3.1 Setting Up Replication to Use Encrypted Connections
+19.3.2 Encrypting Binary Log Files and Relay Log Files
+19.3.3 Replication Privilege Checks
+19.4 Replication Solutions
+19.4.1 Using Replication for Backups
+19.4.2 Handling an Unexpected Halt of a Replica
+19.4.3 Monitoring Row-based Replication
+19.4.4 Using Replication with Different Source and Replica Storage Engines
+19.4.5 Using Replication for Scale-Out
+19.4.6 Replicating Different Databases to Different Replicas
+19.4.7 Improving Replication Performance
+19.4.8 Switching Sources During Failover
+19.4.9 Switching Sources and Replicas with Asynchronous Connection Failover
+19.4.10 Semisynchronous Replication
+19.4.11 Delayed Replication
+19.5 Replication Notes and Tips
+19.5.1 Replication Features and Issues
+19.5.2 Replication Compatibility Between MySQL Versions
+19.5.3 Upgrading a Replication Topology
+19.5.4 Troubleshooting Replication
+19.5.5 How to Report Replication Bugs or Problems
+Replication enables data from one MySQL database server (known as a
+source) to be copied to one or more MySQL database servers (known as
+replicas). Replication is asynchronous by default; replicas do not
+need to be connected permanently to receive updates from a source.
+Depending on the configuration, you can replicate all databases,
+selected databases, or even selected tables within a database.
+Advantages of replication in MySQL include:
+Scale-out solutions - spreading the load among multiple replicas
+to improve performance. In this environment, all writes and
+updates must take place on the source server. Reads, however,
+may take place on one or more replicas. This model can improve
+the performance of writes (since the source is dedicated to
+updates), while dramatically increasing read speed across an
+increasing number of replicas.
+Data security - because the replica can pause the replication
+process, it is possible to run backup services on the replica
+without corrupting the corresponding source data.
+Analytics - live data can be created on the source, while the
+analysis of the information can take place on the replica
+without affecting the performance of the source.
+Long-distance data distribution - you can use replication to
+create a local copy of data for a remote site to use, without
+permanent access to the source.
+For information on how to use replication in such scenarios, see
+Section 19.4, “Replication Solutions”
+.
+MySQL 8.0 supports different methods of replication.
+The traditional method is based on replicating events from the
+source's binary log, and requires the log files and positions in
+them to be synchronized between source and replica. The newer method
+based on
+global transaction
+identifiers
+(GTIDs) is transactional and therefore does
+not require working with log files or positions within these files,
+which greatly simplifies many common replication tasks. Replication
+using GTIDs guarantees consistency between source and replica as
+long as all transactions committed on the source have also been
+applied on the replica. For more information about GTIDs and
+GTID-based replication in MySQL, see
+Section 19.1.3, “Replication with Global Transaction Identifiers”
+. For information on using binary
+log file position based replication, see
+Section 19.1, “Configuring Replication”
+.
+Replication in MySQL supports different types of synchronization.
+The original type of synchronization is one-way, asynchronous
+replication, in which one server acts as the source, while one or
+more other servers act as replicas. This is in contrast to the
+synchronous
+replication which is a
+characteristic of NDB Cluster (see
+Chapter 25,
+MySQL NDB Cluster 8.0
+).
+In MySQL 8.0, semisynchronous replication is supported
+in addition to the built-in asynchronous replication. With
+semisynchronous replication, a commit performed on the source blocks
+before returning to the session that performed the transaction until
+at least one replica acknowledges that it has received and logged
+the events for the transaction; see
+Section 19.4.10, “Semisynchronous Replication”
+. MySQL 8.0 also
+supports delayed replication such that a replica deliberately lags
+behind the source by at least a specified amount of time; see
+Section 19.4.11, “Delayed Replication”
+. For scenarios where
+synchronous
+replication is required, use NDB
+Cluster (see
+Chapter 25,
+MySQL NDB Cluster 8.0
+).
+There are a number of solutions available for setting up replication
+between servers, and the best method to use depends on the presence
+of data and the engine types you are using. For more information on
+the available options, see
+Section 19.1.2, “Setting Up Binary Log File Position Based Replication”
+.
+There are two core types of replication format, Statement Based
+Replication (SBR), which replicates entire SQL statements, and Row
+Based Replication (RBR), which replicates only the changed rows. You
+can also use a third variety, Mixed Based Replication (MBR). For
+more information on the different replication formats, see
+Section 19.2.1, “Replication Formats”
+.
+Replication is controlled through a number of different options and
+variables. For more information, see
+Section 19.1.6, “Replication and Binary Logging Options and Variables”
+. Additional security measures
+can be applied to a replication topology, as described in
+Section 19.3, “Replication Security”
+.
+You can use replication to solve a number of different problems,
+including performance, supporting the backup of different databases,
+and as part of a larger solution to alleviate system failures. For
+information on how to address these issues, see
+Section 19.4, “Replication Solutions”
+.
+For notes and tips on how different data types and statements are
+treated during replication, including details of replication
+features, version compatibility, upgrades, and potential problems
+and their resolution, see
+Section 19.5, “Replication Notes and Tips”
+. For
+answers to some questions often asked by those who are new to MySQL
+Replication, see
+Section A.14, “MySQL 8.0 FAQ: Replication”
+.
+For detailed information on the implementation of replication, how
+replication works, the process and contents of the binary log,
+background threads and the rules used to decide how statements are
+recorded and replicated, see
+Section 19.2, “Replication Implementation”
+.

@@ -1,0 +1,398 @@
+DB_TAG: mysql
+SOURCE_URL: https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-model.html
+DOC_NAME: mysql_transactions
+---
+Skip to Main Content
+The world's most popular open source database
+Contact MySQL
+|
+Login
+|
+Register
+MySQL.com
+Downloads
+Documentation
+Developer Zone
+Developer Zone
+Downloads
+MySQL.com
+Documentation
+MySQL Server
+MySQL Enterprise
+Workbench
+InnoDB Cluster
+MySQL NDB Cluster
+Connectors
+More
+MySQL.com
+Downloads
+Developer Zone
+Section Menu:
+Documentation Home
+MySQL 8.0 Reference Manual
+Preface and Legal Notices
+General Information
+Installing MySQL
+Upgrading MySQL
+Downgrading MySQL
+Tutorial
+MySQL Programs
+MySQL Server Administration
+Security
+Backup and Recovery
+Optimization
+Language Structure
+Character Sets, Collations, Unicode
+Data Types
+Functions and Operators
+SQL Statements
+MySQL Data Dictionary
+The InnoDB Storage Engine
+Introduction to InnoDB
+Benefits of Using InnoDB Tables
+Best Practices for InnoDB Tables
+Verifying that InnoDB is the Default Storage Engine
+Testing and Benchmarking with InnoDB
+InnoDB and the ACID Model
+InnoDB Multi-Versioning
+InnoDB Architecture
+InnoDB In-Memory Structures
+Buffer Pool
+Change Buffer
+Adaptive Hash Index
+Log Buffer
+InnoDB On-Disk Structures
+Tables
+Creating InnoDB Tables
+Creating Tables Externally
+Importing InnoDB Tables
+Moving or Copying InnoDB Tables
+Converting Tables from MyISAM to InnoDB
+AUTO_INCREMENT Handling in InnoDB
+Indexes
+Clustered and Secondary Indexes
+The Physical Structure of an InnoDB Index
+Sorted Index Builds
+InnoDB Full-Text Indexes
+Tablespaces
+The System Tablespace
+File-Per-Table Tablespaces
+General Tablespaces
+Undo Tablespaces
+Temporary Tablespaces
+Moving Tablespace Files While the Server is Offline
+Disabling Tablespace Path Validation
+Optimizing Tablespace Space Allocation on Linux
+Tablespace AUTOEXTEND_SIZE Configuration
+Doublewrite Buffer
+Redo Log
+Undo Logs
+InnoDB Locking and Transaction Model
+InnoDB Locking
+InnoDB Transaction Model
+Transaction Isolation Levels
+autocommit, Commit, and Rollback
+Consistent Nonlocking Reads
+Locking Reads
+Locks Set by Different SQL Statements in InnoDB
+Phantom Rows
+Deadlocks in InnoDB
+An InnoDB Deadlock Example
+Deadlock Detection
+How to Minimize and Handle Deadlocks
+Transaction Scheduling
+InnoDB Configuration
+InnoDB Startup Configuration
+Configuring InnoDB for Read-Only Operation
+InnoDB Buffer Pool Configuration
+Configuring InnoDB Buffer Pool Size
+Configuring Multiple Buffer Pool Instances
+Making the Buffer Pool Scan Resistant
+Configuring InnoDB Buffer Pool Prefetching (Read-Ahead)
+Configuring Buffer Pool Flushing
+Saving and Restoring the Buffer Pool State
+Excluding Buffer Pool Pages from Core Files
+Configuring Thread Concurrency for InnoDB
+Configuring the Number of Background InnoDB I/O Threads
+Using Asynchronous I/O on Linux
+Configuring InnoDB I/O Capacity
+Configuring Spin Lock Polling
+Purge Configuration
+Configuring Optimizer Statistics for InnoDB
+Configuring Persistent Optimizer Statistics Parameters
+Configuring Non-Persistent Optimizer Statistics Parameters
+Estimating ANALYZE TABLE Complexity for InnoDB Tables
+Configuring the Merge Threshold for Index Pages
+Enabling Automatic InnoDB Configuration for a Dedicated MySQL Server
+InnoDB Table and Page Compression
+InnoDB Table Compression
+Overview of Table Compression
+Creating Compressed Tables
+Tuning Compression for InnoDB Tables
+Monitoring InnoDB Table Compression at Runtime
+How Compression Works for InnoDB Tables
+Compression for OLTP Workloads
+SQL Compression Syntax Warnings and Errors
+InnoDB Page Compression
+InnoDB Row Formats
+InnoDB Disk I/O and File Space Management
+InnoDB Disk I/O
+File Space Management
+InnoDB Checkpoints
+Defragmenting a Table
+Reclaiming Disk Space with TRUNCATE TABLE
+InnoDB and Online DDL
+Online DDL Operations
+Online DDL Performance and Concurrency
+Online DDL Space Requirements
+Online DDL Memory Management
+Configuring Parallel Threads for Online DDL Operations
+Simplifying DDL Statements with Online DDL
+Online DDL Failure Conditions
+Online DDL Limitations
+InnoDB Data-at-Rest Encryption
+InnoDB Startup Options and System Variables
+InnoDB INFORMATION_SCHEMA Tables
+InnoDB INFORMATION_SCHEMA Tables about Compression
+INNODB_CMP and INNODB_CMP_RESET
+INNODB_CMPMEM and INNODB_CMPMEM_RESET
+Using the Compression Information Schema Tables
+InnoDB INFORMATION_SCHEMA Transaction and Locking Information
+Using InnoDB Transaction and Locking Information
+InnoDB Lock and Lock-Wait Information
+Persistence and Consistency of InnoDB Transaction and Locking
+Information
+InnoDB INFORMATION_SCHEMA Schema Object Tables
+InnoDB INFORMATION_SCHEMA FULLTEXT Index Tables
+InnoDB INFORMATION_SCHEMA Buffer Pool Tables
+InnoDB INFORMATION_SCHEMA Metrics Table
+InnoDB INFORMATION_SCHEMA Temporary Table Info Table
+Retrieving InnoDB Tablespace Metadata from INFORMATION_SCHEMA.FILES
+InnoDB Integration with MySQL Performance Schema
+Monitoring ALTER TABLE Progress for InnoDB Tables Using Performance
+Schema
+Monitoring InnoDB Mutex Waits Using Performance Schema
+InnoDB Monitors
+InnoDB Monitor Types
+Enabling InnoDB Monitors
+InnoDB Standard Monitor and Lock Monitor Output
+InnoDB Backup and Recovery
+InnoDB Backup
+InnoDB Recovery
+InnoDB and MySQL Replication
+InnoDB memcached Plugin
+Benefits of the InnoDB memcached Plugin
+InnoDB memcached Architecture
+Setting Up the InnoDB memcached Plugin
+InnoDB memcached Multiple get and Range Query Support
+Security Considerations for the InnoDB memcached Plugin
+Writing Applications for the InnoDB memcached Plugin
+Adapting an Existing MySQL Schema for the InnoDB memcached Plugin
+Adapting a memcached Application for the InnoDB memcached Plugin
+Tuning InnoDB memcached Plugin Performance
+Controlling Transactional Behavior of the InnoDB memcached Plugin
+Adapting DML Statements to memcached Operations
+Performing DML and DDL Statements on the Underlying InnoDB Table
+The InnoDB memcached Plugin and Replication
+InnoDB memcached Plugin Internals
+Troubleshooting the InnoDB memcached Plugin
+InnoDB Troubleshooting
+Troubleshooting InnoDB I/O Problems
+Troubleshooting Recovery Failures
+Forcing InnoDB Recovery
+Troubleshooting InnoDB Data Dictionary Operations
+InnoDB Error Handling
+InnoDB Limits
+InnoDB Restrictions and Limitations
+Alternative Storage Engines
+Replication
+Group Replication
+MySQL Shell
+Using MySQL as a Document Store
+InnoDB Cluster
+InnoDB ReplicaSet
+MySQL NDB Cluster 8.0
+Partitioning
+Stored Objects
+INFORMATION_SCHEMA Tables
+MySQL Performance Schema
+MySQL sys Schema
+Connectors and APIs
+MySQL Enterprise Edition
+MySQL Workbench
+MySQL on OCI Marketplace
+MySQL 8.0 Frequently Asked Questions
+Error Messages and Common Problems
+Indexes
+MySQL Glossary
+Related Documentation
+MySQL 8.0 Release Notes
+MySQL 8.0 Source Code Documentation
+Download
+this Manual
+PDF (US Ltr)
+- 43.2Mb
+PDF (A4)
+- 43.3Mb
+Man Pages (TGZ)
+- 295.2Kb
+Man Pages (Zip)
+- 400.4Kb
+Info (Gzip)
+- 4.3Mb
+Info (Zip)
+- 4.3Mb
+Excerpts from this Manual
+MySQL Backup and Recovery
+MySQL Globalization
+MySQL Information Schema
+MySQL Installation Guide
+Security in MySQL
+Starting and Stopping MySQL
+MySQL and Linux/Unix
+MySQL and Windows
+MySQL and macOS
+MySQL and Solaris
+Building MySQL from Source
+MySQL Restrictions and Limitations
+MySQL Partitioning
+MySQL Tutorial
+MySQL Performance Schema
+MySQL Replication
+Using the MySQL Yum Repository
+MySQL NDB Cluster 8.0
+version 8.0
+9.7
+current
+9.6
+9.5
+9.4
+9.3
+9.2
+9.1
+9.0
+8.4
+5.7
+8.0
+Japanese
+MySQL 8.0 Reference Manual
+/
+...
+/
+The InnoDB Storage Engine
+/
+InnoDB Locking and Transaction Model
+/
+InnoDB Transaction Model
+17.7.2 InnoDB Transaction Model
+17.7.2.1 Transaction Isolation Levels
+17.7.2.2 autocommit, Commit, and Rollback
+17.7.2.3 Consistent Nonlocking Reads
+17.7.2.4 Locking Reads
+The
+InnoDB
+transaction model aims to combine
+the best properties of a
+multi-versioning
+database with
+traditional two-phase locking.
+InnoDB
+performs
+locking at the row level and runs queries as nonlocking
+consistent reads
+by
+default, in the style of Oracle. The lock information in
+InnoDB
+is stored space-efficiently so that lock
+escalation is not needed. Typically, several users are permitted
+to lock every row in
+InnoDB
+tables, or any
+random subset of the rows, without causing
+InnoDB
+memory exhaustion.
+PREV
+HOME
+UP
+NEXT
+Related Documentation
+MySQL 8.0 Release Notes
+MySQL 8.0 Source Code Documentation
+Download
+this Manual
+PDF (US Ltr)
+- 43.2Mb
+PDF (A4)
+- 43.3Mb
+Man Pages (TGZ)
+- 295.2Kb
+Man Pages (Zip)
+- 400.4Kb
+Info (Gzip)
+- 4.3Mb
+Info (Zip)
+- 4.3Mb
+Excerpts from this Manual
+MySQL Backup and Recovery
+MySQL Globalization
+MySQL Information Schema
+MySQL Installation Guide
+Security in MySQL
+Starting and Stopping MySQL
+MySQL and Linux/Unix
+MySQL and Windows
+MySQL and macOS
+MySQL and Solaris
+Building MySQL from Source
+MySQL Restrictions and Limitations
+MySQL Partitioning
+MySQL Tutorial
+MySQL Performance Schema
+MySQL Replication
+Using the MySQL Yum Repository
+MySQL NDB Cluster 8.0
+Contact MySQL Sales
+USA/Canada: +1-866-221-0634
+(
+More Countries »
+)
+© 2026 Oracle
+Products
+MySQL HeatWave
+MySQL Enterprise Edition
+MySQL Standard Edition
+MySQL Classic Edition
+MySQL Cluster CGE
+MySQL Embedded (OEM/ISV)
+Services
+Training
+Certification
+Support
+Downloads
+MySQL Community Server
+MySQL NDB Cluster
+MySQL Shell
+MySQL Router
+MySQL Workbench
+Documentation
+MySQL Reference Manual
+MySQL Workbench
+MySQL NDB Cluster
+MySQL Connectors
+Topic Guides
+About MySQL
+Contact Us
+Blogs
+How to Buy
+Partners
+Job Opportunities
+Site Map
+© 2026 Oracle
+Privacy
+/
+Do Not Sell My Info
+|
+Terms of Use
+|
+Trademark Policy
+|

@@ -1,21 +1,16 @@
-import os
 import re
 from pathlib import Path
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 from langchain_core.documents import Document
-from dotenv import load_dotenv
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-load_dotenv()
+from backend import config
 
-# DOCS_DIR points to downloaded database docs
-DOCS_DIR = os.getenv("DOCS_DIR", "./data/db_docs")
+# DOCS_DIR points to downloaded database docs (auto-resolved in config).
+DOCS_DIR = config.DOCS_DIR
 
 # Mapping of db_tag from headers to human-readable label
-DB_LABELS = {
-    "postgresql": "PostgreSQL",
-    "mysql": "MySQL",
-    "mongodb": "MongoDB",
-}
+DB_LABELS = config.DB_LABELS
 
 
 def parse_metadata_header(content: str) -> tuple[dict, str]:

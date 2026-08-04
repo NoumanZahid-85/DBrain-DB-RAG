@@ -1,0 +1,1133 @@
+DB_TAG: mongodb
+SOURCE_URL: https://www.mongodb.com/docs/manual/reference/method/db.currentOp/
+DOC_NAME: mongo_currentop
+---
+Docs Home
+/
+Development
+/
+mongosh Methods
+Docs Home
+/
+Development
+/
+mongosh Methods
+Docs Home
+/
+Development
+/
+mongosh Methods
+db.currentOp() (mongosh method)
+Copy page
+Definition
+db.currentOp()
+Important
+We recommend using the
+$currentOp
+aggregation stage instead of the
+currentOp
+command (deprecated with version 6.2) and the
+db.currentOp()
+method.
+Returns a
+document
+that contains information on in-progress
+operations for the database instance. The
+db.currentOp()
+method wraps the database command
+currentOp
+.
+Note
+Starting in MongoDB 5.0, the
+$currentOp
+aggregation
+stage is used when running the helper method
+db.currentOp()
+with
+mongosh
+.
+Given this, in the 5.0 version of the shell and with mongosh,
+db.currentOp()
+result sets are not subject to the
+16MB BSON document return size
+document return size limit for documents of the previous legacy
+mongo
+versions.
+Compatibility
+This method is available in deployments hosted in the following environments:
+MongoDB Atlas
+: The fully
+managed service for MongoDB deployments in the cloud
+Important
+This command is not supported in M0 and Flex clusters.
+For more information, see
+Unsupported Commands
+.
+MongoDB Enterprise
+: The
+subscription-based, self-managed version of MongoDB
+MongoDB Community
+: The
+source-available, free-to-use, and self-managed version of MongoDB
+Syntax
+db.currentOp()
+has the following form:
+db.
+currentOp
+(<
+operations
+>
+)
+db.currentOp()
+can take the following
+optional
+argument:
+Parameter
+Type
+Description
+operations
+boolean or document
+Optional. Specifies the operations to report on. Can pass either
+a boolean or a document:
+Specify
+true
+to include operations on idle connections and
+system operations.
+Specify a document with query conditions to report only on
+those operations that match the conditions. See
+Behavior
+for details.
+Behavior
+db.currentOp()
+can accept a filter document or a boolean
+parameter.
+If you pass a filter document to
+db.currentOp()
+, the output
+returns information only for the current operations that match the
+filter. The filter document can contain:
+Field
+Description
+"$ownOps"
+Boolean. If set to
+true
+, returns information on the current user's
+operations only.
+On
+mongod
+instances, users can always run
+db.currentOp( { "$ownOps": true } )
+to view their own
+operations.
+"$all"
+Boolean. If set to
+true
+, returns information on all operations,
+including operations on idle connections and system operations.
+For more information, see
+$currentOp (Aggregation Stage)
+.
+If the document includes
+"$all": true
+along with
+Output Fields
+conditions, only the
+"$all":true
+applies.
+<filter>
+Specify filter conditions on the
+Output Fields
+.
+See
+Examples
+.
+If the document includes
+"$all": true
+along with
+Output Fields
+conditions, only the
+"$all":
+true
+applies.
+Passing in
+true
+to
+db.currentOp()
+is equivalent to
+passing in a document of
+{ "$all": true }
+. The following operations
+are equivalent:
+db.
+currentOp
+(
+true
+)
+db.
+currentOp
+(
+{
+"$all"
+:
+true
+} )
+db.currentOp()
+and the
+database profiler
+report the same
+basic diagnostic information for all CRUD operations, including the
+following:
+aggregate
+count
+delete
+distinct
+find
+(
+OP_QUERY
+and
+command
+)
+findAndModify
+getMore
+(
+OP_GET_MORE
+and
+command
+)
+insert
+mapReduce
+update
+These operations are also included in the logging of
+slow queries. See
+slowOpThresholdMs
+for
+more information about slow query logging.
+Access Control
+On systems running with
+authorization
+, the user
+must have access that includes the
+inprog
+privilege
+action.
+Users can run
+db.currentOp( { "$ownOps": true }
+)
+on
+mongod
+instances to view their own operations
+even without the
+inprog
+privilege action.
+Tip
+Create a Role to Manage Current Operations
+Examples
+The following examples use the
+db.currentOp()
+method with
+various query documents to filter the output.
+Write Operations Waiting for a Lock
+The following example returns information on all write operations that
+are waiting for a lock:
+db.
+currentOp
+(
+{
+"waitingForLock"
+:
+true
+,
+$or
+:
+[
+{
+"op"
+:
+{
+"$in"
+:
+[
+"insert"
+,
+"update"
+,
+"remove"
+] } }
+,
+{
+"command.findandmodify"
+:
+{
+$exists
+:
+true
+} }
+]
+}
+)
+Active Operations with no Yields
+The following example returns information on all active running
+operations that have never yielded:
+db.
+currentOp
+(
+{
+"active"
+:
+true
+,
+"numYields"
+:
+0
+,
+"waitingForLock"
+:
+false
+}
+)
+Active Operations on a Specific Database
+The following example returns information on all active operations for
+database
+db1
+that have been running longer than 3 seconds:
+db.
+currentOp
+(
+{
+"active"
+:
+true
+,
+"secs_running"
+:
+{
+"$gt"
+:
+3
+}
+,
+"ns"
+:
+/^db1
+\.
+/
+}
+)
+Active Indexing Operations
+The following example returns information on index creation operations
+on any number of fields:
+db.
+getSiblingDB
+(
+"admin"
+).
+aggregate
+(
+[
+{
+$currentOp
+:
+{
+idleConnections
+:
+true
+} }
+,
+{
+$match
+:
+{
+$or
+:
+[
+{
+"op"
+:
+"command"
+,
+"command.createIndexes"
+:
+{
+$exists
+:
+true
+} }
+,
+{
+"op"
+:
+"none"
+,
+"msg"
+:
+/^Index Build/
+}
+]
+}
+}
+] )
+Output Example
+The following is a prototype of
+db.currentOp()
+output.
+Standalone
+Replica Set (Primary)
+Sharded Cluster (mongos)
+The following is a prototype of the
+currentOp
+output when run on a standalone:
+{
+"inprog"
+:
+[
+{
+"type"
+: <
+string
+>
+,
+"host"
+: <
+string
+>
+,
+"desc"
+: <
+string
+>
+,
+"connectionId"
+: <
+number
+>
+,
+"client"
+: <
+string
+>
+,
+"appName"
+: <
+string
+>
+,
+"clientMetadata"
+: <
+document
+>
+,
+"active"
+: <
+boolean
+>
+,
+"currentOpTime"
+: <
+string
+>
+,
+"effectiveUsers"
+:
+[
+{
+"user"
+: <
+string
+>
+,
+"db"
+: <
+string
+>
+}
+]
+,
+"opid"
+: <
+number
+>
+,
+"lsid"
+:
+{
+"id"
+: <
+UUID
+>
+,
+"uid"
+: <
+BinData
+>
+}
+,
+"secs_running"
+:
+<Long()>,
+"microsecs_running" : <number>,
+"op" : <string>,
+"ns" : <string>,
+"command" : <document>,
+"queryFramework" : <string>,
+"planSummary": <string>,
+"inUseTrackedMemBytes": <Long()>,  // Starting in 8.3
+"peakTrackedMemBytes": <Long()>,   // Starting in 8.3
+"cursor" : {                              // only for getMore operations
+"cursorId" : <Long()>,
+"createdDate" : <ISODate()>,
+"lastAccessDate" : <ISODate()>,
+"nDocsReturned" : <Long()>,
+"nBatchesReturned" : <Long()>,
+"noCursorTimeout" : <boolean>,
+"tailable" : <boolean>,
+"awaitData" : <boolean>,
+"originatingCommand" : <document>,
+"planSummary" : <string>,
+"operationUsingCursorId" : <Long()>
+},
+"msg": <string>,
+"progress" : {
+"done" : <number>,
+"total" : <number>
+},
+"killPending" : <boolean>,
+"numYields" : <number>,
+"dataThroughputLastSecond" : <number>,
+"dataThroughputAverage" : <number>,
+"locks" : {
+"ParallelBatchWriterMode" : <string>,
+"ReplicationStateTransition" : <string>,
+"Global" : <string>,
+"Database" : <string>,
+"Collection" : <string>,
+"Metadata" : <string>,
+"oplog" : <string>
+},
+"waitingForLock" : <boolean>,
+"lockStats" : {
+"ParallelBatchWriterMode" : {
+"acquireCount": {
+"r": <NumberLong>,
+"w": <NumberLong>,
+"R": <NumberLong>,
+"W": <NumberLong>
+},
+"acquireWaitCount": {
+"r": <NumberLong>,
+"w": <NumberLong>,
+"R": <NumberLong>,
+"W": <NumberLong>
+},
+"timeAcquiringMicros" : {
+"r" : Long(0),
+"w" : Long(0),
+"R" : Long(0),
+"W" : Long(0)
+},
+"deadlockCount" : {
+"r" : Long(0),
+"w" : Long(0),
+"R" : Long(0),
+"W" : Long(0)
+}
+},
+"ReplicationStateTransition" : {
+...
+},
+"Global": {
+...
+},
+"Database" : {
+...
+},
+...
+}
+},
+...
+],
+"fsyncLock": <boolean>,
+"info": <string>,
+"ok": <num>
+}
+The following is a prototype of the
+currentOp
+output when run on a primary of a replica set:
+{
+"inprog"
+:
+[
+{
+"type"
+: <
+string
+>
+,
+"host"
+: <
+string
+>
+,
+"desc"
+: <
+string
+>
+,
+"connectionId"
+: <
+number
+>
+,
+"client"
+: <
+string
+>
+,
+"appName"
+: <
+string
+>
+,
+"clientMetadata"
+: <
+document
+>
+,
+"lsid"
+:
+{
+"id"
+: <
+UUID
+>
+,
+"uid"
+: <
+BinData
+>
+}
+,
+"transaction"
+:
+{
+"parameters"
+:
+{
+"txnNumber"
+:
+<Long()>,
+"autocommit" : <boolean>,
+"readConcern" : {
+"level" : <string>
+}
+},
+"readTimestamp" : <Timestamp>,
+"startWallClockTime" : <string>,
+"timeOpenMicros" : <Long()>,
+"timeActiveMicros" : <Long()>,
+"timeInactiveMicros" : <Long()>,
+"expiryTime" : <string>,
+},
+"active" : <boolean>,
+"currentOpTime" : <string>,
+"effectiveUsers" : [
+{
+"user" : <string>,
+"db" : <string>
+}
+],
+"opid" : <number>,
+"secs_running" : <Long()>,
+"microsecs_running" : <number>,
+"op" : <string>,
+"ns" : <string>,
+"command" : <document>,
+"originatingCommand" : <document>,
+"queryFramework" : <string>,
+"planSummary": <string>,
+"inUseTrackedMemBytes": <Long()>,  // Starting in 8.3
+"peakTrackedMemBytes": <Long()>,   // Starting in 8.3
+"prepareReadConflicts" : <Long()>,
+"writeConflicts" : <Long()>,
+"cursor" : {                              // only for getMore operations
+"cursorId" : <Long()>,
+"createdDate" : <ISODate()>,
+"lastAccessDate" : <ISODate()>,
+"nDocsReturned" : <Long()>,
+"nBatchesReturned" : <Long()>,
+"noCursorTimeout" : <boolean>,
+"tailable" : <boolean>,
+"awaitData" : <boolean>,
+"originatingCommand" : <document>,
+"planSummary" : <string>,
+"operationUsingCursorId" : <Long()>
+},
+"msg": <string>,
+"progress" : {
+"done" : <number>,
+"total" : <number>
+},
+"killPending" : <boolean>,
+"numYields" : <number>,
+"dataThroughputLastSecond" : <number>,
+"dataThroughputAverage" : <number>,
+"locks" : {
+"ParallelBatchWriterMode" : <string>,
+"ReplicationStateTransition" : <string>,
+"Global" : <string>,
+"Database" : <string>,
+"Collection" : <string>,
+"Metadata" : <string>,
+"oplog" : <string>
+},
+"waitingForLock" : <boolean>,
+"lockStats" : {
+"ParallelBatchWriterMode" : {
+"acquireCount": {
+"r": <NumberLong>,
+"w": <NumberLong>,
+"R": <NumberLong>,
+"W": <NumberLong>
+},
+"acquireWaitCount": {
+"r": <NumberLong>,
+"w": <NumberLong>,
+"R": <NumberLong>,
+"W": <NumberLong>
+},
+"timeAcquiringMicros" : {
+"r" : Long(0),
+"w" : Long(0),
+"R" : Long(0),
+"W" : Long(0)
+},
+"deadlockCount" : {
+"r" : Long(0),
+"w" : Long(0),
+"R" : Long(0),
+"W" : Long(0)
+}
+},
+"ReplicationStateTransition" : {
+...
+},
+"Global" : {
+...
+},
+"Database" : {
+...
+},
+...
+}
+},
+...
+],
+"fsyncLock": <boolean>,
+"info": <string>,
+"ok": <num>,
+"operationTime": <timestamp>,
+"$clusterTime": <document>
+}
+The following is an example of the
+currentOp
+output when run on a
+mongos
+of a sharded
+cluster (Fields may vary depending on the operation being
+reported):
+{
+"inprog"
+:
+[
+{
+"shard"
+: <
+string
+>
+,
+"type"
+: <
+string
+>
+,
+"host"
+: <
+string
+>
+,
+"desc"
+: <
+string
+>
+,
+"connectionId"
+: <
+number
+>
+,
+"client_s"
+: <
+string
+>
+,
+"appName"
+: <
+string
+>
+,
+"clientMetadata"
+: <
+document
+>
+,
+"lsid"
+:
+{
+"id"
+: <
+UUID
+>
+,
+"uid"
+: <
+BinData
+>
+}
+,
+"transaction"
+:
+{
+"parameters"
+:
+{
+"txnNumber"
+:
+<Long()>,
+"autocommit" : <boolean>,
+"readConcern" : {
+"level" : <string>
+}
+},
+"readTimestamp" : <Timestamp>,
+"startWallClockTime" : <string>,
+"timeOpenMicros" : <Long()>,
+"timeActiveMicros" : <Long()>,
+"timeInactiveMicros" : <Long()>,
+"expiryTime" : <string>,
+},
+"active" : <boolean>,
+"currentOpTime" : <string>,
+"effectiveUsers" : [
+{
+"user" : <string>,
+"db" : <string>
+}
+],
+"runBy" : [
+{
+"user" : <string>,
+"db" : <string>
+}
+],
+"twoPhaseCommitCoordinator" : {
+"lsid" : {
+"id" : <UUID>,
+"uid" : <BinData>
+},
+"txnNumber" : <NumberLong>,
+"numParticipants" : <NumberLong>,
+"state" : <string>,
+"commitStartTime" : <ISODate>,
+"hasRecoveredFromFailover" : <boolean>,
+"stepDurations" : <document>,
+"decision" : <document>,
+"deadline" : <ISODate>
+}
+"opid" : <string>,
+"secs_running" : <Long()>,
+"microsecs_running" : <number>,
+"op" : <string>,
+"ns" : <string>,
+"command" : <document>,
+"configTime" : <Timestamp>,           // Starting in 5.0
+"topologyTime" : <Timestamp>,           // Starting in 5.0
+"queryFramework" : <string>,            // Starting in 6.2
+"planSummary": <string>,
+"inUseTrackedMemBytes": <Long()>,  // Starting in 8.3
+"peakTrackedMemBytes": <Long()>,   // Starting in 8.3
+"prepareReadConflicts" : <Long()>,
+"writeConflicts" : <Long()>,
+"cursor" : {                              // only for getMore operations
+"cursorId" : <Long()>,
+"createdDate" : <ISODate()>,
+"lastAccessDate" : <ISODate()>,
+"nDocsReturned" : <Long()>,
+"nBatchesReturned" : <Long()>,
+"noCursorTimeout" : <boolean>,
+"tailable" : <boolean>,
+"awaitData" : <boolean>,
+"originatingCommand" : <document>,
+"planSummary" : <string>,
+"operationUsingCursorId" : <Long()>
+},
+"msg": <string>,
+"progress" : {
+"done" : <number>,
+"total" : <number>
+},
+"killPending" : <boolean>,
+"numYields" : <number>,
+"dataThroughputLastSecond" : <number>,
+"dataThroughputAverage" : <number>,
+"locks" : {
+"ParallelBatchWriterMode" : <string>,
+"ReplicationStateTransition" : <string>,
+"Global" : <string>,
+"Database" : <string>,
+"Collection" : <string>,
+"Metadata" : <string>,
+"DDLDatabase" : <string>,
+"DDLCollection" : <string>,
+"oplog" : <string>
+},
+"waitingForLock" : <boolean>,
+"lockStats" : {
+"ParallelBatchWriterMode": {
+"acquireCount": {
+"r": <NumberLong>,
+"w": <NumberLong>,
+"R": <NumberLong>,
+"W": <NumberLong>
+},
+"acquireWaitCount": {
+"r": <NumberLong>,
+"w": <NumberLong>,
+"R": <NumberLong>,
+"W": <NumberLong>
+},
+"timeAcquiringMicros" : {
+"r" : Long(0),
+"w" : Long(0),
+"R" : Long(0),
+"W" : Long(0)
+},
+"deadlockCount" : {
+"r" : Long(0),
+"w" : Long(0),
+"R" : Long(0),
+"W" : Long(0)
+}
+},
+"ReplicationStateTransition" : {
+...
+},
+"Global" : {
+...
+},
+"Database" : {
+...
+},
+...
+}
+},
+...
+],
+"ok": <num>,
+"operationTime": <timestamp>,
+"$clusterTime": <document>
+}
+Specific Output Examples
+These output samples illustrate
+currentOp
+output for particular
+operations. The fields that make up the actual output vary depending on
+the server's role.
+Resharding Output Example
+{
+shard
+:
+'<string>'
+,
+totalCopyTimeElapsedSecs
+:
+Long
+(
+'<count>'
+)
+,
+totalApplyTimeElapsedSecs
+:
+Long
+(
+'<count>'
+)
+,
+totalCriticalSectionTimeElapsedSecs
+:
+Long
+(
+'<count>'
+)
+,
+totalIndexBuildTimeElapsedSecs
+:
+Long
+(
+'<count>'
+)
+,
+indexesToBuild
+:
+Long
+(
+'<count>'
+)
+,
+indexesBuilt
+:
+Long
+(
+'<count>'
+)
+,
+oplogEntriesFetched
+:
+Long
+(
+'<count>'
+)
+,
+oplogEntriesApplied
+:
+Long
+(
+'<count>'
+)
+,
+insertsApplied
+:
+Long
+(
+'<count>'
+)
+,
+updatesApplied
+:
+Long
+(
+'<count>'
+)
+,
+deletesApplied
+:
+Long
+(
+'<count>'
+)
+,
+type
+:
+'op'
+,
+desc
+:
+'ReshardingMetrics{Donor|Recipient|Coordinator}Service <reshardingUUID>'
+,
+op
+:
+'command'
+,
+ns
+:
+'<database>.<collection>'
+,
+originatingCommand
+:
+{
+reshardCollection
+:
+'<database>.<collection>'
+,
+key
+:
+'<shardkey>'
+,
+unique
+:
+'<boolean>'
+,
+collation
+:
+{
+locale
+:
+'simple'
+}
+}
+,
+totalOperationTimeElapsedSecs
+:
+Long
+(
+'<count>'
+)
+,
+recipientState
+:
+'<service state>'
+,
+remainingOperationTimeEstimatedSecs
+:
+Long
+(
+'<count>'
+)
+,
+approxDocumentsToCopy
+:
+Long
+(
+'<count>'
+)
+,
+approxBytesToCopy
+:
+Long
+(
+'<count>'
+)
+,
+bytesCopied
+:
+Long
+(
+'<count>'
+)
+,
+countWritesToStashCollections
+:
+Long
+(
+'<count>'
+)
+,
+documentsCopied
+:
+Long
+(
+'<count>'
+)
+,
+provenance
+:
+'reshardCollection'
+}
+Output Fields
+For a complete list of
+db.currentOp()
+output fields, see
+currentOp
+.
+Back
+db.createView
+Next
+db.dropDatabase

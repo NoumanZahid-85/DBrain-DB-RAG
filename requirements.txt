@@ -14,6 +14,11 @@ langchain-chroma==1.0.0
 langchain-google-genai==4.2.4
 langchain-ollama>=0.3.0
 
+# Embeddings & reranker (both scoped in DBrain Module 7 tool table)
+# Reranker cross-encoder / optional local MiniLM embeddings via sentence-transformers.
+# ~80MB. Lazy-imported; the pipeline degrades gracefully when absent.
+sentence-transformers==2.7.0
+
 # Numerical / ML
 numpy==2.2.6
 
@@ -31,5 +36,10 @@ requests==2.34.2
 beautifulsoup4==4.14.3
 cloudscraper==1.2.71
 
-# Reranker (lightweight cross‑encoder – required for `reranker.py`)
-# sentence-transformers==2.7.0   # ~80MB, safe for 512MB free tier
+# Dev / test
+pytest>=8.0,<9.0
+
+# Live DB diagnostic drivers (Phase 2 — DBrain v2 Diagnostic Agent)
+psycopg2-binary>=2.9      # PostgreSQL inspector
+pymysql>=1.1              # MySQL / MariaDB inspector
+pymongo>=4.6              # MongoDB inspector

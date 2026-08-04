@@ -1,45 +1,70 @@
-try:
-    from sentence_transformers import CrossEncoder
-    HAS_RERANKER = True
-except ImportError:
-    HAS_RERANKER = False
+"""Cross-encoder reranker (optional, lazy-loaded).
 
+FE-7.4/feature #6: cross-encoder re-scoring of the hybrid candidates. The
+module never hard-fails the pipeline — if sentence-transformers is missing the
+rerank stage degrades gracefully to RRF ordering (``RERANKER_ENABLED=false``
+or a missing package both bypass the stage).
+"""
+
+from __future__ import annotations
+
+import logging
+import os
 import time
 
-MODEL_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+from backend import config
+
+LOG = logging.getLogger("dbrain.reranker")
+
+try:
+    from sentence_transformers import CrossEncoder
+
+    HAS_RERANKER = True
+except ImportError:  # pragma: no cover - env dependent
+    CrossEncoder = None
+    HAS_RERANKER = False
+
+MODEL_NAME = config.RERANKER_MODEL
 _model = None
 
 
-def get_reranker() -> CrossEncoder | None:
+def is_available() -> bool:
+    return HAS_RERANKER and config.RERANKER_ENABLED
+
+
+def get_reranker():
+    """Return the cross-encoder model or None when unavailable."""
     global _model
-    if not HAS_RERANKER:
+    if not is_available():
         return None
     if _model is None:
-        print(f"Loading cross-encoder: {MODEL_NAME} (first load ~30s)")
+        LOG.info("Loading cross-encoder: %s (first load ~30s)", MODEL_NAME)
         _model = CrossEncoder(MODEL_NAME)
     return _model
 
 
 def rerank(query: str, chunks: list[dict], top_k: int = 5) -> list[dict]:
-    """
-    Score (query, chunk) pairs with cross-encoder.
-    Unlike bi-encoder similarity, the cross-encoder sees both together —
-    dramatically better at judging relevance, especially for technical queries.
+    """Score (query, chunk) pairs with the cross-encoder.
 
-    Performance on CPU: ~50-200ms for 10 chunks. Acceptable for a web app.
+    Falls back to plain RRF order when the model is unavailable.
     """
     if not chunks:
         return chunks
 
     model = get_reranker()
     if model is None:
-        print("Reranker: sentence-transformers not installed. Bypassing reranking stage.")
+        LOG.info(
+            "Reranker unavailable (package %s, enabled=%s). Using RRF order.",
+            "installed" if HAS_RERANKER else "missing",
+            config.RERANKER_ENABLED,
+        )
         for chunk in chunks:
-            chunk["rerank_score"] = chunk.get("fused_score", chunk.get("score", 0.0))
+            chunk["rerank_score"] = chunk.get(
+                "rerank_score", chunk.get("normalized_score", chunk.get("fused_score", 0.0))
+            )
         return chunks[:top_k]
 
     t0 = time.perf_counter()
-
     pairs = [(query, c["text"]) for c in chunks]
     scores = model.predict(pairs)
 
@@ -48,22 +73,6 @@ def rerank(query: str, chunks: list[dict], top_k: int = 5) -> list[dict]:
 
     reranked = sorted(chunks, key=lambda x: x["rerank_score"], reverse=True)
     elapsed = round((time.perf_counter() - t0) * 1000, 1)
-    print(f"Reranker: {len(chunks)} chunks -> top {top_k} in {elapsed}ms")
+    LOG.info("Reranker: %d chunks -> top %d in %sms", len(chunks), top_k, elapsed)
 
     return reranked[:top_k]
-
-
-if __name__ == "__main__":
-    from hybrid_retrieval import hybrid_search
-
-    query = "How do I create a partial index in PostgreSQL?"
-    candidates = hybrid_search(query, top_k=10)
-
-    print("Before reranking (top 5 by RRF):")
-    for c in candidates[:5]:
-        print(f"  [{c['db']:<12}] fused={c.get('fused_score', 0):.4f} | {c['text'][:70]}...")
-
-    reranked = rerank(query, candidates, top_k=5)
-    print("\nAfter reranking (top 5 by cross-encoder):")
-    for c in reranked:
-        print(f"  [{c['db']:<12}] rerank={c['rerank_score']:.3f} | {c['text'][:70]}...")

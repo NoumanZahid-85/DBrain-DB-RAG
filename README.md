@@ -1,176 +1,143 @@
-# ⚡ DBrain Performance RAG — Technical Co-Pilot
+# DBrain Performance RAG — Technical Co-Pilot
 
-A production-grade, metrics-driven, and CI-gated **Retrieval-Augmented Generation (RAG)** system that provides verified, citation-backed performance optimization answers over **PostgreSQL**, **MySQL**, and **MongoDB** official documentation.
+A metrics-driven, CI-gated **Retrieval-Augmented Generation (RAG)** system that answers performance-optimization questions over the official **PostgreSQL**, **MySQL**, and **MongoDB** documentation with verifiable citations.
 
-This project serves as **Module 7 (Chat Interface & RAG)** for **DBrain**—an AI-powered database performance co-pilot. It is designed to act as a production-grade portfolio piece, featuring hybrid retrieval, cross-encoder reranking, observability tracing, and automated quality evaluation gates.
+This is **Module 7 (Chat Interface & RAG)** of **DBrain**, an AI-powered database performance co-pilot. The design favors honest, production-grade behavior: local-by-default embeddings, a standardised hosted LLM, evidence gates that refuse rather than hallucinate, and full observability.
 
----
-#### DBrain Rag Frontend
-DBrain Performance RAG is working with different user queries:
-![Rag Frontend](images/frontend.png)
+![RAG Frontend](images/frontend.png)
 
 ## System Architecture
 
 ```mermaid
 graph TD
     User([User Query]) --> FE[React Frontend]
-    FE -->|POST /query| BE[FastAPI Backend]
-    
-    subgraph Pipeline [Advanced Retrieval Pipeline]
-        BE --> Router{DB Detector}
-        Router -->|postgresql| DB1[PG Chunks]
-        Router -->|mysql| DB2[MySQL Chunks]
-        Router -->|mongodb| DB3[Mongo Chunks]
-        Router -->|None / Cross-DB| DBAll[All Chunks]
-        
-        DB1 & DB2 & DB3 & DBAll --> BM25[BM25 Sparse Search]
-        DB1 & DB2 & DB3 & DBAll --> Chroma[ChromaDB Dense Search]
-        
+    FE -->|POST /api/v1/query| BE[FastAPI Backend]
+
+    subgraph Pipeline [Retrieval Pipeline]
+        BE --> Router{DB Router}
+        Router -->|postgresql| PG[PG Chunks]
+        Router -->|mysql| MY[MySQL Chunks]
+        Router -->|mongodb| MO[Mongo Chunks]
+        Router -->|None / cross-DB tie| ALL[Per-DB retrieval, then merge]
+
+        PG & MY & MO & ALL --> BM25[BM25 Sparse]
+        PG & MY & MO & ALL --> Chroma[ChromaDB Dense]
+
         BM25 --> RRF[Reciprocal Rank Fusion]
         Chroma --> RRF
-        
-        RRF --> Rerank[Cross-Encoder Reranker]
-        Rerank --> TopK[Top-K Context Chunks]
+        RRF --> Gate[Relevance Gate on [0,1] scale]
+        Gate --> Div[Cross-DB Diversity]
+        Div --> Rerank[Optional Cross-Encoder]
     end
-    
+
     subgraph Gen [Grounded Generation]
-        TopK --> Guard{Guardrails & Citations}
-        Guard -->|Sufficient Context| LLM[LLM: Gemma 4 / Gemini]
-        Guard -->|Insufficient Context| Refused[Refusal Message]
-        LLM --> Answer[Grounded Answer + Citations]
+        Rerank --> LLM[Groq gpt-oss-120b]
+        LLM --> Answer[Answer + Citations]
+        LLM -->|insufficient context| Refused[Refusal Message]
     end
-    
-    Answer --> LF[Langfuse Trace Logs]
+
+    Answer --> LF[Langfuse Traces]
+    Answer --> Metrics[(SQLite /metrics)]
     Answer --> FE
 ```
 
----
+## Tech Stack
 
-## Tech Stack & Key Concepts
-
-| Component | Technology | Role / Explanation |
+| Component | Technology | Role |
 |---|---|---|
-| **Frontend** | React, TypeScript, Axios | Premium dark-themed performance dashboard UI with database filter tabs, precise latency telemetry, and query cards. |
-| **Backend** | Python, FastAPI | High-performance API hosting the search, query, health, stats, and telemetry metrics endpoints. |
-| **Vector Store** | ChromaDB | Local dense vector database storing document chunks for semantic search. |
-| **Embeddings** | HuggingFace (`all-MiniLM-L6-v2`) | Embeds chunks and query sentences into 384-dimensional vectors. |
-| **Sparse Search** | Rank-BM25 | Handles keyword matching (e.g. searching for exact function or table names like `pg_stat_statements`). |
-| **Fusion (RRF)** | Reciprocal Rank Fusion | Mathematical blending of BM25 and ChromaDB rankings to combine keyword and intent relevance. |
-| **Reranker** | Cross-Encoder (`ms-marco-MiniLM-L-6-v2`) | Computes deep transformer attention scores between queries and retrieved chunks, filtering the top results. |
-| **LLM Provider** | **Dynamic**: Ollama (`gemma4:12b`) / Google Gemini | Runs local Ollama `gemma4:12b-it-qat` by default to avoid quota limits, but falls back to Google Gemini in CI/CD and production. |
-| **Observability** | Langfuse SDK / OpenTelemetry | Traces spans, token usage, latency breakdowns, and prompt inputs/outputs. |
-| **Evaluation** | RAGAS Framework | Computes metric scores for Faithfulness, Answer Relevancy, and Context Precision. |
-| **CI/CD** | GitHub Actions | Automatically builds index, executes tests, and gates pull requests on RAGAS score targets. |
+| **Frontend** | React, TypeScript, react-markdown | Dark dashboard: multi-turn chat, session persistence, "Propose Action" |
+| **Backend** | Python, FastAPI, uvicorn | `/api/v1/query`, `/sessions`, `/metrics`, `/stats`, `/health` |
+| **Vector store** | ChromaDB (persistent, local) | Dense semantic search over 1,193 chunks |
+| **Embeddings** | `all-MiniLM-L6-v2` via ChromaDB ONNX (`EMBEDDING_PROVIDER=local`) | Offline, 384-dim, no API key |
+| **Sparse search** | Rank-BM25 (per-database indexes) | Exact keyword match (e.g. `pg_stat_statements`) |
+| **Fusion** | Reciprocal Rank Fusion (RRF) | Blends BM25 + dense rankings |
+| **Reranker** | `cross-encoder/ms-marco-MiniLM-L-6-v2` (optional) | Deep relevance rescoring; graceful skip when not installed |
+| **LLM** | Groq `openai/gpt-oss-120b` | Chat + RAGAS evaluator (Ollama/Gemini demoted to optional fallbacks) |
+| **Sessions** | SQLite (`backend/chat.py`) | Multi-turn history, `session_id` on `/query` |
+| **Metrics** | SQLite (`backend/metrics_store.py`) | P50/P95 latency, refusal rate, per-DB breakdown |
+| **Observability** | Langfuse SDK / OpenTelemetry | Span attributes: detected_db, chunks, scores, per-stage latency |
+| **Evaluation** | RAGAS | Faithfulness / Answer Relevancy gate in CI |
+| **CI/CD** | GitHub Actions | Unit + API tests always; RAGAS gate with `EVAL_LIMIT=3` |
+| **Deploy** | Docker / docker-compose / render.yaml | Multi-stage Dockerfile, frontend served via nginx-less static build |
 
----
+## Module 7 Requirements Traceability
 
-## Key Features Done So Far
+| Requirement | Where it lives |
+|---|---|
+| **FE-7.1** Chat with history | `backend/chat.py` SQLite sessions; `App.tsx` multi-turn UI, localStorage persistence, "New Chat Session" |
+| **FE-7.2** Context providers | `backend/providers.py` — pluggable `ContextProvider` interface, docs-only default, graceful degradation |
+| **FE-7.3** Cross-database queries | Ambiguous routing in `detect_database` (ties → `None`), per-DB retrieval + `ensure_db_diversity` |
+| **FE-7.4** Command guardrail | `backend/guardrails.py::check_command_guardrail` — blocks destructive statements, allows learning questions |
+| **FE-7.5** Recommendation action | `POST /api/v1/actions` (pending-recommendation stub) + "Propose Action" button in the UI |
 
-1. **Aesthetic & Professional UI:** A dark/black theme designed with modern typography (`Plus Jakarta Sans` & `JetBrains Mono`), smooth transitions, responsive grid dashboard layout, and real-time query performance monitoring (Latency, Retrieved vs. Used chunks, Rerank Scores, and Routing).
-2. **Database Query Routing:** Scans queries for structural database keywords (e.g., `vacuum` -> PostgreSQL, `innodb` -> MySQL, `aggregation pipeline` -> MongoDB). If a specific database is detected, the search is scoped exclusively to that database's official documentation to eliminate cross-talk and improve retrieval precision.
-3. **Zero-Hallucination Guardrails:** If the cross-encoder scores of all retrieved context chunks fall below a relevance threshold (e.g. `0.15`), the pipeline triggers a guardrail that returns: *"I cannot answer this question based on the available documentation. The retrieved context does not contain sufficient information."*
-4. **Exact Citations:** The prompt forces the LLM to output a dedicated `Sources:` section and append specific references (`[Source: filename (Database)]`) after every factual claim.
-5. **Hybrid Retrieval (Dense + Sparse):** Blends vector dense embeddings with BM25 keyword matching using Reciprocal Rank Fusion (RRF) to ensure exact keyword matches (e.g. `pg_stat_statements`) are retrieved alongside semantic intent.
-6. **Cross-Encoder Reranking:** Integrates `sentence-transformers` Cross-Encoder to evaluate the candidate context chunks against the user's query, outputting a precise relevance score.
-7. **Production Observability & Tracing:** Implements full Langfuse dashboard integration to log token usage, execute traces, track latency across retrieval/reranking/generation phases, and run automated evaluations.
+## Key Behaviors
 
-### Observability Tracing Screenshots
+1. **Honest routing** — `detect_database` scores keyword concepts (deduplicated for substring overlap). Single-DB questions scope retrieval to that engine; cross-DB questions (ties) retrieve every engine's best chunks so no database is starved out.
+2. **Evidence gate, not guesswork** — retrieved chunks are scored on a normalised `[0,1]` scale; below `RELEVANCE_THRESHOLD` (0.15) they are dropped. If nothing survives, the system refuses: *"I cannot answer this question based on the available documentation."* — no hallucination.
+3. **Exact citations** — the prompt requires `[Source: doc_name (Database)]` after every claim plus a `Sources:` section; sources are echoed from the actually-used chunks.
+4. **Command guardrail** — `DROP/DELETE/TRUNCATE/UPDATE/INSERT/ALTER…DROP` prompts are refused with a guardrail reason; "how do I drop…" learning questions still get documented guidance.
+5. **Multi-turn sessions** — history is injected into the prompt; `/metrics` records latency percentiles and refusal rate.
+6. **Provider resilience** — LLM calls retry with exponential backoff on 503/429/queue-full; reranker and Langfuse degrade gracefully; embeddings run fully offline by default.
 
-#### Trace Latency Overview
-Shows request execution flow, token counts, and API response latencies inside the Langfuse console:
-![Langfuse Trace Latency Overview](images/langfuse1.png)
-
-#### Request Span Analysis
-Detailed breakdown of execution stages: Retrieval, Reranking, and Generation token usages:
-![Langfuse Request Span Analysis](images/lanfuse2.png)
-
-#### Prompt Verification & Outputs
-Verifies system instructions, injected context blocks, and generated citations matching the target docs:
-![Langfuse Prompt Verification](images/langfuse3.png)
-
----
-
-## Housekeeping: Redundant Files
-To keep the workspace clean and optimize disk space, the following directories are **not necessary** and can be safely removed:
-*   `chroma_db/`: Redundant vector store folder (active database is configured to `./chroma_db_local` in the `.env`).
-*   `chroma_db_v2/`: Redundant vector store folder.
-*   `LangChain/`: Local experimental directory containing tutorial scripts (`chain_string_output_parser.py`, `pydentic_output_parser.py`, etc.). The actual production RAG is implemented inside `backend/`.
-
----
-
-## Local Setup & Execution
+## Local Setup
 
 ### 1. Prerequisites
-Ensure you have the following installed:
-*   [Python 3.10+](https://www.python.org/)
-*   [Node.js 18+](https://nodejs.org/)
-*   [Ollama](https://ollama.com/) (For local LLM execution)
+- Python 3.10+
+- Node.js 18+
+- A Groq API key (`GROQ_API_KEY`) — the only required external credential
 
-### 2. Environment Configuration
-Create a `.env` file in the root directory:
-```env
-GOOGLE_API_KEY="your_gemini_api_key"
-LANGFUSE_SECRET_KEY="your_langfuse_secret_key"
-LANGFUSE_PUBLIC_KEY="your_langfuse_public_key"
-LANGFUSE_HOST="https://cloud.langfuse.com"
-CHROMA_PERSIST_DIR="./chroma_db_local"
-DOCS_DIR="./data/db_docs"
-USE_OLLAMA="true"
+### 2. Environment
+```powershell
+Copy-Item .env.example .env
+# edit .env: set GROQ_API_KEY
 ```
 
-### 3. Run Ingestion and Indexing
-Download the documentation corpus, build the vector store database, and compile the BM25 sparse index:
+### 3. Ingest + index
 ```powershell
-# Create virtual environment and install backend requirements
-python -m venv venv
-venv\Scripts\activate
+python -m venv dbrain
+dbrain\Scripts\activate
 pip install -r requirements.txt
-
-# Run crawler & ingest scripts
-python scripts/download_corpus.py
-python backend/ingest.py
-python backend/vectorstore.py
-python backend/hybrid_retrieval.py
+python scripts/reindex.py          # builds Chroma + BM25 indexes (local embeddings)
 ```
 
-### 4. Pull and Run the Local LLM
-Open a terminal and download/verify the local model:
+### 4. Run
 ```powershell
-# Pull the Gemma 4 12B instruction-tuned model
-ollama pull gemma4:12b-it-qat
-```
-
-### 5. Start the Services
-Run the FastAPI backend:
-```powershell
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-In another terminal, start the React frontend:
-```powershell
+uvicorn backend.main:app --host 0.0.0.0 --port 8000
+# second terminal:
 cd frontend
 npm install
 npm start
 ```
 
----
-
-## Run Evaluations
-
-To run evaluation on the golden Q&A dataset (e.g. testing only 1 question to verify behavior quickly):
+### 5. Smoke test
 ```powershell
-# Set environment limit and run evaluation
-$env:EVAL_LIMIT="1"
-python eval/run_eval.py mysql
+$body = @{ query = "What types of indexes does PostgreSQL support?" } | ConvertTo-Json
+Invoke-RestMethod -Uri http://127.0.0.1:8000/api/v1/query -Method Post -ContentType "application/json" -Body $body
 ```
-*Note: Due to CPU inference speeds, a single local RAGAS evaluation can take 3-5 minutes, as RAGAS runs multiple diagnostic LLM steps sequentially.*
 
----
+## Tests & Evaluation
 
-## GitHub Actions CI Gate
+```powershell
+python -m pytest tests/ -q          # 31 unit + API tests (hermetic, offline)
+$env:EVAL_LIMIT="3"; python eval/run_eval.py   # RAGAS gate, Groq evaluator + local embeddings
+```
 
-The repository has an integrated GitHub Actions workflow `.github/workflows/eval.yml`. Every time you push a commit or open a pull request:
-1. The runner downloads the corpus and builds the database.
-2. It sets up the dynamic LLM model (falling back to **Gemini API** because Ollama is not present in standard GitHub runners).
-3. It runs the full RAGAS evaluation suite.
-4. If the aggregate Faithfulness or Relevancy scores drop below the required threshold, the CI pipeline fails, gating regressions from entering the `main` branch.
+CI (`.github/workflows/eval.yml`) always runs the unit/API suite, verifies the service boots via the render start command, and gates merges on RAGAS scores.
+
+## Configuration Highlights (`backend/config.py`)
+
+| Env var | Default | Meaning |
+|---|---|---|
+| `EMBEDDING_PROVIDER` | `local` | `local` (offline ONNX) / `jina` / `gemini` |
+| `GROQ_MODEL` | `openai/gpt-oss-120b` | Chat + evaluator LLM |
+| `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated allowlist |
+| `API_KEY` | *(empty)* | Optional bearer auth; empty disables |
+| `RELEVANCE_THRESHOLD` | `0.15` | Evidence gate on normalised score |
+| `RERANKER_ENABLED` | `true` | Cross-encoder; auto-skips if package missing |
+| `DB_FILE` / `CHROMA_PERSIST_DIR` / `DOCS_DIR` | defaults | SQLite / vector store / corpus paths |
+
+## Housekeeping: Redundant Files
+
+The following are **not** part of the current pipeline and can be removed to save space:
+- `chroma_db/`, `chroma_db_v2/` — older vector stores (active: `./chroma_db_local`)
+- `LangChain/` — experimental tutorial scripts; production RAG lives in `backend/`

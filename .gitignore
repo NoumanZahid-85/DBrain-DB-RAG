@@ -1,15 +1,35 @@
+# Secrets — never commit
 .env
-chroma_db/
-data/
-__pycache__/
+
+# Virtual envs
 venv/
 dbrain/
-.agents/
+
+# Runtime artifacts (SQLite, vector stores, indexes)
+chroma_db_local/
+data/dbrain.db
+bm25_index.pkl
+*.sqlite3
+
+# Python
+__pycache__/
 .pyconfig.json
+
+# Tooling
+.agents/
 skills-lock.json
 pyrightconfig.json
 RAG_Project_Roadmap_v2.md
-my_chroma_db
-scripts/test_embed.py
-.agents
 frontend/node_modules
+frontend/build
+frontend/lib
+my_chroma_db
+DBrain_Scope_Document.docx
+
+# Build artifacts / caches
+.pytest_cache/
+__pycache__/
+*.pyc
+
+# The training corpus IS versioned (needed for CI reindex + fresh Docker demo).
+# Only the DB files above are ignored, NOT data/db_docs/.

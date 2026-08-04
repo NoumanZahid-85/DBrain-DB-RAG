@@ -1,0 +1,400 @@
+DB_TAG: mysql
+SOURCE_URL: https://dev.mysql.com/doc/refman/8.0/en/optimization-indexes.html
+DOC_NAME: mysql_indexes
+---
+Skip to Main Content
+The world's most popular open source database
+Contact MySQL
+|
+Login
+|
+Register
+MySQL.com
+Downloads
+Documentation
+Developer Zone
+Developer Zone
+Downloads
+MySQL.com
+Documentation
+MySQL Server
+MySQL Enterprise
+Workbench
+InnoDB Cluster
+MySQL NDB Cluster
+Connectors
+More
+MySQL.com
+Downloads
+Developer Zone
+Section Menu:
+Documentation Home
+MySQL 8.0 Reference Manual
+Preface and Legal Notices
+General Information
+Installing MySQL
+Upgrading MySQL
+Downgrading MySQL
+Tutorial
+MySQL Programs
+MySQL Server Administration
+Security
+Backup and Recovery
+Optimization
+Optimization Overview
+Optimizing SQL Statements
+Optimizing SELECT Statements
+WHERE Clause Optimization
+Range Optimization
+Index Merge Optimization
+Hash Join Optimization
+Engine Condition Pushdown Optimization
+Index Condition Pushdown Optimization
+Nested-Loop Join Algorithms
+Nested Join Optimization
+Outer Join Optimization
+Outer Join Simplification
+Multi-Range Read Optimization
+Block Nested-Loop and Batched Key Access Joins
+Condition Filtering
+Constant-Folding Optimization
+IS NULL Optimization
+ORDER BY Optimization
+GROUP BY Optimization
+DISTINCT Optimization
+LIMIT Query Optimization
+Function Call Optimization
+Window Function Optimization
+Row Constructor Expression Optimization
+Avoiding Full Table Scans
+Optimizing Subqueries, Derived Tables, View References, and Common Table
+Expressions
+Optimizing IN and EXISTS Subquery Predicates with Semijoin
+Transformations
+Optimizing Subqueries with Materialization
+Optimizing Subqueries with the EXISTS Strategy
+Optimizing Derived Tables, View References, and Common Table Expressions
+with Merging or Materialization
+Derived Condition Pushdown Optimization
+Optimizing INFORMATION_SCHEMA Queries
+Optimizing Performance Schema Queries
+Optimizing Data Change Statements
+Optimizing INSERT Statements
+Optimizing UPDATE Statements
+Optimizing DELETE Statements
+Optimizing Database Privileges
+Other Optimization Tips
+Optimization and Indexes
+How MySQL Uses Indexes
+Primary Key Optimization
+SPATIAL Index Optimization
+Foreign Key Optimization
+Column Indexes
+Multiple-Column Indexes
+Verifying Index Usage
+InnoDB and MyISAM Index Statistics Collection
+Comparison of B-Tree and Hash Indexes
+Use of Index Extensions
+Optimizer Use of Generated Column Indexes
+Invisible Indexes
+Descending Indexes
+Indexed Lookups from TIMESTAMP Columns
+Optimizing Database Structure
+Optimizing Data Size
+Optimizing MySQL Data Types
+Optimizing for Numeric Data
+Optimizing for Character and String Types
+Optimizing for BLOB Types
+Optimizing for Many Tables
+How MySQL Opens and Closes Tables
+Disadvantages of Creating Many Tables in the Same Database
+Internal Temporary Table Use in MySQL
+Limits on Number of Databases and Tables
+Limits on Table Size
+Limits on Table Column Count and Row Size
+Optimizing for InnoDB Tables
+Optimizing Storage Layout for InnoDB Tables
+Optimizing InnoDB Transaction Management
+Optimizing InnoDB Read-Only Transactions
+Optimizing InnoDB Redo Logging
+Bulk Data Loading for InnoDB Tables
+Optimizing InnoDB Queries
+Optimizing InnoDB DDL Operations
+Optimizing InnoDB Disk I/O
+Optimizing InnoDB Configuration Variables
+Optimizing InnoDB for Systems with Many Tables
+Optimizing for MyISAM Tables
+Optimizing MyISAM Queries
+Bulk Data Loading for MyISAM Tables
+Optimizing REPAIR TABLE Statements
+Optimizing for MEMORY Tables
+Understanding the Query Execution Plan
+Optimizing Queries with EXPLAIN
+EXPLAIN Output Format
+Extended EXPLAIN Output Format
+Obtaining Execution Plan Information for a Named Connection
+Estimating Query Performance
+Controlling the Query Optimizer
+Controlling Query Plan Evaluation
+Switchable Optimizations
+Optimizer Hints
+Index Hints
+The Optimizer Cost Model
+Optimizer Statistics
+Buffering and Caching
+InnoDB Buffer Pool Optimization
+The MyISAM Key Cache
+Shared Key Cache Access
+Multiple Key Caches
+Midpoint Insertion Strategy
+Index Preloading
+Key Cache Block Size
+Restructuring a Key Cache
+Caching of Prepared Statements and Stored Programs
+Optimizing Locking Operations
+Internal Locking Methods
+Table Locking Issues
+Concurrent Inserts
+Metadata Locking
+External Locking
+Optimizing the MySQL Server
+Optimizing Disk I/O
+Using Symbolic Links
+Using Symbolic Links for Databases on Unix
+Using Symbolic Links for MyISAM Tables on Unix
+Using Symbolic Links for Databases on Windows
+Optimizing Memory Use
+How MySQL Uses Memory
+Monitoring MySQL Memory Usage
+Enabling Large Page Support
+Measuring Performance (Benchmarking)
+Measuring the Speed of Expressions and Functions
+Using Your Own Benchmarks
+Measuring Performance with performance_schema
+Examining Server Thread (Process) Information
+Accessing the Process List
+Thread Command Values
+General Thread States
+Replication Source Thread States
+Replication I/O (Receiver) Thread States
+Replication SQL Thread States
+Replication Connection Thread States
+NDB Cluster Thread States
+Event Scheduler Thread States
+Tracing the Optimizer
+Typical Usage
+System Variables Controlling Tracing
+Traceable Statements
+Tuning Trace Purging
+Tracing Memory Usage
+Privilege Checking
+Interaction with the --debug Option
+The optimizer_trace System Variable
+The end_markers_in_json System Variable
+Selecting Optimizer Features to Trace
+Trace General Structure
+Example
+Displaying Traces in Other Applications
+Preventing the Use of Optimizer Trace
+Testing Optimizer Trace
+Optimizer Trace Implementation
+Language Structure
+Character Sets, Collations, Unicode
+Data Types
+Functions and Operators
+SQL Statements
+MySQL Data Dictionary
+The InnoDB Storage Engine
+Alternative Storage Engines
+Replication
+Group Replication
+MySQL Shell
+Using MySQL as a Document Store
+InnoDB Cluster
+InnoDB ReplicaSet
+MySQL NDB Cluster 8.0
+Partitioning
+Stored Objects
+INFORMATION_SCHEMA Tables
+MySQL Performance Schema
+MySQL sys Schema
+Connectors and APIs
+MySQL Enterprise Edition
+MySQL Workbench
+MySQL on OCI Marketplace
+MySQL 8.0 Frequently Asked Questions
+Error Messages and Common Problems
+Indexes
+MySQL Glossary
+Related Documentation
+MySQL 8.0 Release Notes
+MySQL 8.0 Source Code Documentation
+Download
+this Manual
+PDF (US Ltr)
+- 43.2Mb
+PDF (A4)
+- 43.3Mb
+Man Pages (TGZ)
+- 295.2Kb
+Man Pages (Zip)
+- 400.4Kb
+Info (Gzip)
+- 4.3Mb
+Info (Zip)
+- 4.3Mb
+Excerpts from this Manual
+MySQL Backup and Recovery
+MySQL Globalization
+MySQL Information Schema
+MySQL Installation Guide
+Security in MySQL
+Starting and Stopping MySQL
+MySQL and Linux/Unix
+MySQL and Windows
+MySQL and macOS
+MySQL and Solaris
+Building MySQL from Source
+MySQL Restrictions and Limitations
+MySQL Partitioning
+MySQL Tutorial
+MySQL Performance Schema
+MySQL Replication
+Using the MySQL Yum Repository
+MySQL NDB Cluster 8.0
+version 8.0
+9.7
+current
+9.6
+9.5
+9.4
+9.3
+9.2
+9.1
+9.0
+8.4
+5.7
+8.0
+Japanese
+MySQL 8.0 Reference Manual
+/
+Optimization
+/
+Optimization and Indexes
+10.3 Optimization and Indexes
+10.3.1 How MySQL Uses Indexes
+10.3.2 Primary Key Optimization
+10.3.3 SPATIAL Index Optimization
+10.3.4 Foreign Key Optimization
+10.3.5 Column Indexes
+10.3.6 Multiple-Column Indexes
+10.3.7 Verifying Index Usage
+10.3.8 InnoDB and MyISAM Index Statistics Collection
+10.3.9 Comparison of B-Tree and Hash Indexes
+10.3.10 Use of Index Extensions
+10.3.11 Optimizer Use of Generated Column Indexes
+10.3.12 Invisible Indexes
+10.3.13 Descending Indexes
+10.3.14 Indexed Lookups from TIMESTAMP Columns
+The best way to improve the performance of
+SELECT
+operations is to create
+indexes on one or more of the columns that are tested in the
+query. The index entries act like pointers to the table rows,
+allowing the query to quickly determine which rows match a
+condition in the
+WHERE
+clause, and retrieve the
+other column values for those rows. All MySQL data types can be
+indexed.
+Although it can be tempting to create an indexes for every
+possible column used in a query, unnecessary indexes waste space
+and waste time for MySQL to determine which indexes to use.
+Indexes also add to the cost of inserts, updates, and deletes
+because each index must be updated. You must find the right
+balance to achieve fast queries using the optimal set of indexes.
+PREV
+HOME
+UP
+NEXT
+Related Documentation
+MySQL 8.0 Release Notes
+MySQL 8.0 Source Code Documentation
+Download
+this Manual
+PDF (US Ltr)
+- 43.2Mb
+PDF (A4)
+- 43.3Mb
+Man Pages (TGZ)
+- 295.2Kb
+Man Pages (Zip)
+- 400.4Kb
+Info (Gzip)
+- 4.3Mb
+Info (Zip)
+- 4.3Mb
+Excerpts from this Manual
+MySQL Backup and Recovery
+MySQL Globalization
+MySQL Information Schema
+MySQL Installation Guide
+Security in MySQL
+Starting and Stopping MySQL
+MySQL and Linux/Unix
+MySQL and Windows
+MySQL and macOS
+MySQL and Solaris
+Building MySQL from Source
+MySQL Restrictions and Limitations
+MySQL Partitioning
+MySQL Tutorial
+MySQL Performance Schema
+MySQL Replication
+Using the MySQL Yum Repository
+MySQL NDB Cluster 8.0
+Contact MySQL Sales
+USA/Canada: +1-866-221-0634
+(
+More Countries »
+)
+© 2026 Oracle
+Products
+MySQL HeatWave
+MySQL Enterprise Edition
+MySQL Standard Edition
+MySQL Classic Edition
+MySQL Cluster CGE
+MySQL Embedded (OEM/ISV)
+Services
+Training
+Certification
+Support
+Downloads
+MySQL Community Server
+MySQL NDB Cluster
+MySQL Shell
+MySQL Router
+MySQL Workbench
+Documentation
+MySQL Reference Manual
+MySQL Workbench
+MySQL NDB Cluster
+MySQL Connectors
+Topic Guides
+About MySQL
+Contact Us
+Blogs
+How to Buy
+Partners
+Job Opportunities
+Site Map
+© 2026 Oracle
+Privacy
+/
+Do Not Sell My Info
+|
+Terms of Use
+|
+Trademark Policy
+|

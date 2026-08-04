@@ -1,0 +1,43 @@
+# DBrain Module 7 — local production-like stack
+# Usage:
+#   docker compose up --build
+#   open http://localhost:8000/docs
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    container_name: dbrain-rag-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - CHROMA_PERSIST_DIR=./chroma_db_local
+      - DOCS_DIR=./data/db_docs
+      - EMBEDDING_PROVIDER=local
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+    volumes:
+      - ./chroma_db_local:/app/chroma_db_local
+      - ./data:/app/data
+      - ./bm25_index.pkl:/app/bm25_index.pkl
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  frontend:
+    image: node:20-alpine
+    container_name: dbrain-rag-frontend
+    working_dir: /app
+    command: sh -c "npm install && npm run build && npx serve -s build -l 3000"
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend
