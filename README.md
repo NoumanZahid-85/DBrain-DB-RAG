@@ -1,10 +1,13 @@
-# DBrain Performance RAG — Technical Co-Pilot
+# ⚡ DBrain Performance RAG — Technical Co-Pilot
 
-A metrics-driven, CI-gated **Retrieval-Augmented Generation (RAG)** system that answers performance-optimization questions over the official **PostgreSQL**, **MySQL**, and **MongoDB** documentation with verifiable citations.
+A production-grade, metrics-driven, and CI-gated **Retrieval-Augmented Generation (RAG)** system that provides verified, citation-backed performance optimization answers over **PostgreSQL**, **MySQL**, and **MongoDB** official documentation.
 
-This is **Module 7 (Chat Interface & RAG)** of **DBrain**, an AI-powered database performance co-pilot. The design favors honest, production-grade behavior: local-by-default embeddings, a standardised hosted LLM, evidence gates that refuse rather than hallucinate, and full observability.
+This project serves as **Module 7 (Chat Interface & RAG)** for **DBrain**—an AI-powered database performance co-pilot. It is designed to act as a production-grade portfolio piece, featuring hybrid retrieval, cross-encoder reranking, observability tracing, and automated quality evaluation gates.
 
-![RAG Frontend](images/frontend.png)
+---
+#### DBrain Rag Frontend
+DBrain Performance RAG is working with different user queries:
+![Rag Frontend](images/frontend.png)
 
 ## System Architecture
 
@@ -25,7 +28,7 @@ graph TD
 
         BM25 --> RRF[Reciprocal Rank Fusion]
         Chroma --> RRF
-        RRF --> Gate[Relevance Gate on [0,1] scale]
+        RRF --> Gate[Relevance Gate on \[0,1] scale]
         Gate --> Div[Cross-DB Diversity]
         Div --> Rerank[Optional Cross-Encoder]
     end
@@ -41,24 +44,28 @@ graph TD
     Answer --> FE
 ```
 
-## Tech Stack
+---
 
-| Component | Technology | Role |
+## Tech Stack & Key Concepts
+
+| Component | Technology | Role / Explanation |
 |---|---|---|
 | **Frontend** | React, TypeScript, react-markdown | Dark dashboard: multi-turn chat, session persistence, "Propose Action" |
 | **Backend** | Python, FastAPI, uvicorn | `/api/v1/query`, `/sessions`, `/metrics`, `/stats`, `/health` |
-| **Vector store** | ChromaDB (persistent, local) | Dense semantic search over 1,193 chunks |
+| **Vector Store** | ChromaDB (persistent, local) | Dense semantic search over 1,193 chunks |
 | **Embeddings** | `all-MiniLM-L6-v2` via ChromaDB ONNX (`EMBEDDING_PROVIDER=local`) | Offline, 384-dim, no API key |
-| **Sparse search** | Rank-BM25 (per-database indexes) | Exact keyword match (e.g. `pg_stat_statements`) |
-| **Fusion** | Reciprocal Rank Fusion (RRF) | Blends BM25 + dense rankings |
+| **Sparse Search** | Rank-BM25 (per-database indexes) | Exact keyword match (e.g. `pg_stat_statements`) |
+| **Fusion (RRF)** | Reciprocal Rank Fusion | Blends BM25 + dense rankings |
 | **Reranker** | `cross-encoder/ms-marco-MiniLM-L-6-v2` (optional) | Deep relevance rescoring; graceful skip when not installed |
-| **LLM** | Groq `openai/gpt-oss-120b` | Chat + RAGAS evaluator (Ollama/Gemini demoted to optional fallbacks) |
+| **LLM Provider** | Groq `openai/gpt-oss-120b` | Chat + RAGAS evaluator (Ollama/Gemini demoted to optional fallbacks) |
 | **Sessions** | SQLite (`backend/chat.py`) | Multi-turn history, `session_id` on `/query` |
 | **Metrics** | SQLite (`backend/metrics_store.py`) | P50/P95 latency, refusal rate, per-DB breakdown |
 | **Observability** | Langfuse SDK / OpenTelemetry | Span attributes: detected_db, chunks, scores, per-stage latency |
-| **Evaluation** | RAGAS | Faithfulness / Answer Relevancy gate in CI |
+| **Evaluation** | RAGAS Framework | Faithfulness / Answer Relevancy gate in CI |
 | **CI/CD** | GitHub Actions | Unit + API tests always; RAGAS gate with `EVAL_LIMIT=3` |
-| **Deploy** | Docker / docker-compose / render.yaml | Multi-stage Dockerfile, frontend served via nginx-less static build |
+| **Deploy** | Docker / docker-compose / render.yaml | Multi-stage Dockerfile, persistent disks for Chroma + SQLite |
+
+---
 
 ## Module 7 Requirements Traceability
 
@@ -70,6 +77,8 @@ graph TD
 | **FE-7.4** Command guardrail | `backend/guardrails.py::check_command_guardrail` — blocks destructive statements, allows learning questions |
 | **FE-7.5** Recommendation action | `POST /api/v1/actions` (pending-recommendation stub) + "Propose Action" button in the UI |
 
+---
+
 ## Key Behaviors
 
 1. **Honest routing** — `detect_database` scores keyword concepts (deduplicated for substring overlap). Single-DB questions scope retrieval to that engine; cross-DB questions (ties) retrieve every engine's best chunks so no database is starved out.
@@ -79,7 +88,9 @@ graph TD
 5. **Multi-turn sessions** — history is injected into the prompt; `/metrics` records latency percentiles and refusal rate.
 6. **Provider resilience** — LLM calls retry with exponential backoff on 503/429/queue-full; reranker and Langfuse degrade gracefully; embeddings run fully offline by default.
 
-## Local Setup
+---
+
+## Local Setup & Execution
 
 ### 1. Prerequisites
 - Python 3.10+
@@ -115,14 +126,18 @@ $body = @{ query = "What types of indexes does PostgreSQL support?" } | ConvertT
 Invoke-RestMethod -Uri http://127.0.0.1:8000/api/v1/query -Method Post -ContentType "application/json" -Body $body
 ```
 
+---
+
 ## Tests & Evaluation
 
 ```powershell
-python -m pytest tests/ -q          # 31 unit + API tests (hermetic, offline)
+python -m pytest tests/ -q          # 90 unit + API tests (hermetic, offline)
 $env:EVAL_LIMIT="3"; python eval/run_eval.py   # RAGAS gate, Groq evaluator + local embeddings
 ```
 
 CI (`.github/workflows/eval.yml`) always runs the unit/API suite, verifies the service boots via the render start command, and gates merges on RAGAS scores.
+
+---
 
 ## Configuration Highlights (`backend/config.py`)
 
@@ -135,6 +150,8 @@ CI (`.github/workflows/eval.yml`) always runs the unit/API suite, verifies the s
 | `RELEVANCE_THRESHOLD` | `0.15` | Evidence gate on normalised score |
 | `RERANKER_ENABLED` | `true` | Cross-encoder; auto-skips if package missing |
 | `DB_FILE` / `CHROMA_PERSIST_DIR` / `DOCS_DIR` | defaults | SQLite / vector store / corpus paths |
+
+---
 
 ## Housekeeping: Redundant Files
 
