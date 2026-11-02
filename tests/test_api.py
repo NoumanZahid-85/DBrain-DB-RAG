@@ -43,6 +43,7 @@ def _fake_hybrid_search(query, top_k=15, db_filter=None):
             "source_url": "",
             "chunk_id": 1,
             "score": 0.9,
+            "semantic_score": 0.62,
             "fused_score": 0.03,
             "normalized_score": 1.0,
             "rerank_score": 0.9,
@@ -81,14 +82,11 @@ def client(tmp_path, monkeypatch):
     from backend import chat as chat_mod
     from backend import metrics_store as ms_mod
     from backend import main as main_mod
-
-    chat_mod._session_store = None
-    ms_mod._metrics_store = None
-    # Reset module-level singletons used by rag_chain.stores()
     import backend.rag_chain as rc
 
+    monkeypatch.setattr(main_mod, "warm_up", lambda: None)  # no real index/models
+    monkeypatch.setattr(main_mod, "_limiter", main_mod.RateLimiter(0))
     rc._session_store = None
-    rc._metrics_store = None
     # main.py builds its stores at import time; rebuild against temp DB.
     main_mod._session_store = chat_mod.SessionStore()
     main_mod._metrics_store = ms_mod.MetricsStore()
@@ -97,9 +95,10 @@ def client(tmp_path, monkeypatch):
         yield c
 
 
-def test_root_and_health(client):
-    assert client.get("/").json()["status"] == "ok"
+def test_health_and_status(client, monkeypatch):
+    monkeypatch.setattr("backend.main.get_index_stats", lambda: {"total": 3})
     assert client.get("/health").json()["status"] == "healthy"
+    assert client.get("/api/v1/status").json()["index"]["total"] == 3
 
 
 def test_query_flow(client):
@@ -112,8 +111,20 @@ def test_query_flow(client):
     assert body["refused"] is False
     assert len(body["sources"]) >= 1
     assert body["detected_db"] == "postgresql"
-    assert body["top_chunk_score"] == 1.0
+    assert body["top_chunk_score"] == 0.62
+    assert body["citations"][0]["doc_name"] == "pg_indexes.txt"
+    assert set(body["timings"]) == {"retrieval_ms", "rerank_ms", "generation_ms"}
     assert body["latency_ms"] >= 0
+
+
+def test_off_topic_refused_without_llm_call(client, monkeypatch):
+    """Weak dense similarity refuses even though min-max scores the top chunk 1.0."""
+    weak = [dict(c, semantic_score=0.08) for c in _fake_hybrid_search("x")]
+    monkeypatch.setattr("backend.rag_chain.hybrid_search", lambda *a, **k: weak)
+    monkeypatch.setattr("backend.rag_chain._invoke_llm", lambda m: pytest.fail("LLM called"))
+    body = client.post("/api/v1/query", json={"query": "best pizza in Naples?"}).json()
+    assert body["refused"] is True
+    assert body["citations"] == []
 
 
 def test_legacy_query_alias(client):
@@ -131,7 +142,7 @@ def test_command_guardrail_refusal(client):
     body = resp.json()
     assert body["refused"] is True
     assert "Destructive" in body["answer"]
-    assert body["context_used"] if "context_used" in body else True
+    assert body["guardrail_blocked"] is True
 
 
 def test_query_validation(client):
@@ -183,41 +194,24 @@ def test_propose_action(client):
     assert len(actions["actions"]) == 1
 
 
-def test_api_key_enforced(monkeypatch, tmp_path):
-    monkeypatch.setenv("API_KEY", "secret-demo")
-    import importlib
+def test_admin_key_guards_operator_endpoints(client, monkeypatch):
+    """Public Q&A stays open; state-changing and listing endpoints need the key."""
+    monkeypatch.setattr("backend.config.API_KEY", "secret-demo")
+    assert client.post("/api/v1/query", json={"query": "What is VACUUM?"}).status_code == 200
+    assert client.get("/api/v1/sessions").status_code == 401
+    assert client.post("/api/v1/proposals/x/apply").status_code == 401
+    assert client.post("/api/v1/diagnose", json={"symptom": "db is slow"}).status_code == 401
+    assert client.get("/api/v1/sessions", headers={"X-API-Key": "secret-demo"}).status_code == 200
+    bearer = client.get("/api/v1/actions", headers={"Authorization": "Bearer secret-demo"})
+    assert bearer.status_code == 200
 
-    from backend import config as config_mod
 
-    monkeypatch.setattr(config_mod, "API_KEY", "secret-demo")
-
-    # Keep the reloaded main on the hermetic stack (fake LLM/retrieval).
-    monkeypatch.setattr("backend.llm.get_llm", lambda: FakeLLM())
-    monkeypatch.setattr("backend.rag_chain.get_llm", lambda: FakeLLM())
-    monkeypatch.setattr("backend.rag_chain.hybrid_search", _fake_hybrid_search)
-    monkeypatch.setattr("backend.reranker.is_available", lambda: False)
-    from backend import chat as chat_mod
-    from backend import metrics_store as ms_mod
-
-    monkeypatch.setattr(config_mod, "DB_FILE", tmp_path / "keytest.db")
-    monkeypatch.setattr("backend.chat.config.DB_FILE", tmp_path / "keytest.db")
-    monkeypatch.setattr("backend.metrics_store.config.DB_FILE", tmp_path / "keytest.db")
-
-    # Reload main so middlewares rebuild with the temp key value.
+def test_rate_limit(client, monkeypatch):
     from backend import main as main_mod
 
-    main_mod = importlib.reload(main_mod)
-    main_mod._session_store = chat_mod.SessionStore()
-    main_mod._metrics_store = ms_mod.MetricsStore()
-
-    with TestClient(main_mod.app) as c:
-        ok = c.get("/")
-        assert ok.status_code == 200  # exempt path
-        denied = c.post("/api/v1/query", json={"query": "vacuum"})
-        assert denied.status_code == 401
-        allowed = c.post(
-            "/api/v1/query",
-            json={"query": "vacuum"},
-            headers={"X-API-Key": "secret-demo"},
-        )
-        assert allowed.status_code == 200
+    monkeypatch.setattr(main_mod, "_limiter", main_mod.RateLimiter(2))
+    codes = [
+        client.post("/api/v1/query", json={"query": "What is VACUUM?"}).status_code
+        for _ in range(3)
+    ]
+    assert codes == [200, 200, 429]
