@@ -1,0 +1,15 @@
+-r requirements.txt
+-r requirements-reranker.txt
+
+# Tests
+pytest>=8.0
+httpx==0.28.1
+
+# RAGAS evaluation (eval/run_eval.py)
+ragas==0.4.3
+langchain==1.3.4
+
+# Corpus download (scripts/download_corpus.py)
+requests==2.34.2
+beautifulsoup4==4.14.3
+cloudscraper==1.2.71

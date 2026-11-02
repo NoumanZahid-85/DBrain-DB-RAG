@@ -2,34 +2,34 @@
 .env
 
 # Virtual envs
+.venv/
 venv/
 dbrain/
 
-# Runtime artifacts (SQLite, vector stores, indexes)
+# Generated at build/boot time (scripts/reindex.py or app startup)
 chroma_db_local/
-data/dbrain.db
 bm25_index.pkl
+data/dbrain.db*
+data/state/
 *.sqlite3
+eval/last_results.json
 
 # Python
 __pycache__/
-.pyconfig.json
+*.pyc
+.pytest_cache/
+.benchmarks/
 
-# Tooling
+# Frontend
+frontend/node_modules
+frontend/build
+
+# Local tooling / private docs
 .agents/
 skills-lock.json
 pyrightconfig.json
 RAG_Project_Roadmap_v2.md
-frontend/node_modules
-frontend/build
-frontend/lib
-my_chroma_db
 DBrain_Scope_Document.docx
+my_chroma_db
 
-# Build artifacts / caches
-.pytest_cache/
-__pycache__/
-*.pyc
-
-# The training corpus IS versioned (needed for CI reindex + fresh Docker demo).
-# Only the DB files above are ignored, NOT data/db_docs/.
+# The documentation corpus IS versioned (data/db_docs/): the index is built from it.

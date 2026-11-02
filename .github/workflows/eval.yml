@@ -1,4 +1,4 @@
-name: RAG Pipeline Check
+name: CI
 
 on:
   push:
@@ -7,80 +7,76 @@ on:
     branches: [main]
 
 jobs:
-  unit-and-api-tests:
+  backend-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python 3.11
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
+          cache: pip
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run hermetic unit + API tests
         run: |
-          python -m pytest tests/ -q
+          pip install torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-dev.txt
+      - name: Hermetic unit + API tests
+        run: python -m pytest tests/ -q
 
-      - name: Verify backend boots (import path regression guard)
+  frontend-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+        env:
+          CI: "true"  # warnings fail the build
+
+  docker-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [backend-tests, frontend-build]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the lean production image (what Render free runs)
+        run: docker build --build-arg RERANKER_ENABLED=false -t dbrain:ci .
+      - name: Boot it and hit /health and the UI
         run: |
-          python -c "import backend.main; print('uvicorn backend.main:app OK')"
+          docker run -d --name dbrain -p 8000:8000 dbrain:ci
+          for i in $(seq 1 30); do curl -fs localhost:8000/health && break; sleep 2; done
+          curl -fs localhost:8000/health
+          curl -fs localhost:8000/ | grep -q '<div id="root">'
+          curl -fs localhost:8000/api/v1/status
 
   ragas-gate:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: unit-and-api-tests
-    if: always() && needs.unit-and-api-tests.result == 'success'
-
+    needs: backend-tests
+    if: github.event_name == 'push'
     env:
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-      EMBEDDING_PROVIDER: local
-      CHROMA_PERSIST_DIR: ./chroma_db_local
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       EVAL_LIMIT: "3"
-      USE_OLLAMA: "false"
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python 3.11
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
+          cache: pip
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Rebuild retrieval index (local MiniLM, no API key required)
-        run: python scripts/reindex.py
-
-      - name: Run RAGAS quality gate
-        run: python eval/run_eval.py
-
-  smoke-query-on-render:
-    runs-on: ubuntu-latest
-    needs: unit-and-api-tests
-    if: always() && needs.unit-and-api-tests.result == 'success'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Verify render.yaml start command boots the app
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          EMBEDDING_PROVIDER: local
         run: |
-          python -c "import backend.main; print('startCommand module import OK')"
+          pip install torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-dev.txt
+      - name: Build retrieval index (local MiniLM, no API key)
+        run: python scripts/reindex.py
+      - name: RAGAS quality gate
+        run: python eval/run_eval.py

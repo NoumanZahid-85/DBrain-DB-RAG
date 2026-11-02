@@ -1,41 +1,28 @@
+# One Docker web service: API + UI on the same origin.
+# The index is built into the image, so no persistent disk is needed.
+# SQLite chat history is ephemeral on the free plan (resets on redeploy).
 services:
   - type: web
     name: dbrain-db-rag
-    runtime: python
-    rootDir: .
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
     envVars:
-      - key: EMBEDDING_PROVIDER
-        value: local
-      - key: EMBEDDING_MODEL
-        value: all-MiniLM-L6-v2
-      - key: CHROMA_PERSIST_DIR
-        value: ./chroma_db_local
-      - key: USE_OLLAMA
-        value: "false"
-      - key: GROQ_MODEL
-        value: openai/gpt-oss-120b
-      - key: CORS_ORIGINS
-        value: https://dbrain-db-rag.onrender.com,http://localhost:3000
-      - key: API_KEY
-        sync: false
       - key: GROQ_API_KEY
         sync: false
-      - key: GOOGLE_API_KEY
-        sync: false
-      - key: JINA_API_KEY
-        sync: false
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      # Free plan has 512MB RAM: skip torch. Set true on a 2GB+ instance.
+      - key: RERANKER_ENABLED
+        value: "false"
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "15"
+      - key: API_KEY
+        generateValue: true
       - key: LANGFUSE_SECRET_KEY
         sync: false
       - key: LANGFUSE_PUBLIC_KEY
         sync: false
       - key: LANGFUSE_HOST
         value: https://cloud.langfuse.com
-    disk:
-      - name: chroma-data
-        mountPath: ./chroma_db_local
-        sizeGB: 1
-      - name: sqlite-data
-        mountPath: ./data
-        sizeGB: 1

@@ -1,0 +1,4 @@
+# Cross-encoder reranker. Optional: pulls in transformers + torch (~300MB RSS).
+# Install CPU torch first:  pip install torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
+# Without it the pipeline keeps fusion order (backend/reranker.py degrades gracefully).
+sentence-transformers==2.7.0
