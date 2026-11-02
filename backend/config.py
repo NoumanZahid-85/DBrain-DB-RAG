@@ -115,6 +115,9 @@ TOP_K_DEFAULT = _env_int("TOP_K_DEFAULT", 10)
 RERANK_TOP_K = _env_int("RERANK_TOP_K", 5)
 # Gate applied to the normalised relevance score in [0, 1] (scale-independent).
 RELEVANCE_THRESHOLD = _env_float("RELEVANCE_THRESHOLD", 0.15)
+# Absolute evidence gate: min-max normalisation always gives the best chunk 1.0,
+# so off-topic questions are refused on the raw cosine of the best dense hit.
+MIN_SEMANTIC_SIMILARITY = _env_float("MIN_SEMANTIC_SIMILARITY", 0.35)
 GUARDRAIL_ENABLED = _env_bool("GUARDRAIL_ENABLED", True)
 # Reranker requires sentence-transformers; when missing the pipeline degrades
 # gracefully to RRF ordering (keeps the 512MB free tier usable).
@@ -128,9 +131,14 @@ RERANKER_MODEL = _env("RERANKER_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2")
 CORS_ORIGINS = [o.strip() for o in _env("CORS_ORIGINS", "").split(",") if o.strip()]
 if not CORS_ORIGINS:
     CORS_ORIGINS = ["http://localhost:3000"]
-API_KEY = os.getenv("API_KEY", "")  # empty disables authentication
+# Admin key guarding state-changing / operator endpoints (approve/apply, listings).
+# Public Q&A stays open so anyone can try the demo. Empty disables the check.
+API_KEY = os.getenv("API_KEY", "")
 REQUEST_ID_HEADER = "X-Request-ID"
-AUTH_EXEMPT_PATHS = {"/", "/health"}
+# Per-client-IP request budget for the LLM-backed endpoints (0 disables).
+RATE_LIMIT_PER_MINUTE = _env_int("RATE_LIMIT_PER_MINUTE", 20)
+# Built React app; served by FastAPI on the same origin when present.
+FRONTEND_DIST = PROJECT_ROOT / "frontend" / "build"
 
 # --------------------------------------------------------------------------
 # Observability
@@ -153,6 +161,3 @@ MONGO_DIAG_DB  = os.getenv("MONGO_DIAG_DB", "admin")
 PG_APPLY_DSN    = os.getenv("PG_APPLY_DSN", "")
 MYSQL_APPLY_DSN = os.getenv("MYSQL_APPLY_DSN", "")
 MONGO_APPLY_URI = os.getenv("MONGO_APPLY_URI", "")
-
-# SQLite file shared between SessionStore, MetricsStore, ChangeManager, ImprovementTracker
-DB_FILE = str(PROJECT_ROOT / "data" / "dbrain.db")

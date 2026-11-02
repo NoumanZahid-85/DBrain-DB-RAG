@@ -8,21 +8,17 @@ or a missing package both bypass the stage).
 
 from __future__ import annotations
 
+import importlib.util
 import logging
-import os
 import time
 
 from backend import config
 
 LOG = logging.getLogger("dbrain.reranker")
 
-try:
-    from sentence_transformers import CrossEncoder
-
-    HAS_RERANKER = True
-except ImportError:  # pragma: no cover - env dependent
-    CrossEncoder = None
-    HAS_RERANKER = False
+# Probe without importing: sentence-transformers pulls in torch (~300MB RSS),
+# which must not load on small instances that run with RERANKER_ENABLED=false.
+HAS_RERANKER = importlib.util.find_spec("sentence_transformers") is not None
 
 MODEL_NAME = config.RERANKER_MODEL
 _model = None
@@ -38,6 +34,8 @@ def get_reranker():
     if not is_available():
         return None
     if _model is None:
+        from sentence_transformers import CrossEncoder
+
         LOG.info("Loading cross-encoder: %s (first load ~30s)", MODEL_NAME)
         _model = CrossEncoder(MODEL_NAME)
     return _model

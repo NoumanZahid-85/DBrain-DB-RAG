@@ -79,6 +79,26 @@ def build_bm25_index() -> dict:
     return index_data
 
 
+def ensure_index() -> None:
+    """Build Chroma + BM25 from the corpus when the collection is empty.
+
+    Generated indexes are not committed, so a fresh checkout or container
+    self-provisions on first boot (local ONNX embeddings, no API key needed).
+    """
+    collection = get_or_create_collection(get_chroma_client())
+    if collection.count() > 0:
+        return
+    from backend.ingest import chunk_documents, load_documents
+    from backend.vectorstore import index_chunks
+
+    docs = load_documents(str(config.DOCS_DIR))
+    if not docs:
+        raise RuntimeError(f"No documents found in {config.DOCS_DIR}; cannot build the index.")
+    index_chunks(chunk_documents(docs), force=True)
+    reset_bm25_cache()
+    build_bm25_index()
+
+
 def load_bm25_index() -> dict:
     """Load the BM25 index from disk (or build it when absent).
 
