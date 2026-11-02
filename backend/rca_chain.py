@@ -87,7 +87,11 @@ OUTPUT FORMAT — respond with valid JSON only, no prose outside the JSON:
 
 RULES:
 - If the metrics provide no clear signal, set findings=[] and explain in refusal_reason.
-- Only propose fixes that are safe to apply to a running system: CREATE INDEX CONCURRENTLY, ANALYZE, ALTER TABLE SET ... (config params), not DROP or destructive DDL.
+- fix_sql must be ONE statement of these kinds only (anything else is discarded):
+  CREATE [UNIQUE] INDEX [CONCURRENTLY] ..., ANALYZE ..., VACUUM ..., OPTIMIZE TABLE ...,
+  ALTER TABLE <t> SET (...), ALTER TABLE <t> ADD INDEX/KEY ..., SET GLOBAL/SESSION ...
+- For MongoDB, fix_sql must be a JSON object: {"collection": "<name>", "keys": {"<field>": 1}}
+- Never propose DROP, DELETE, UPDATE, INSERT, TRUNCATE or any destructive DDL.
 - Rank findings by impact (highest first).
 - Always cite the documentation source for every recommendation.
 - Be specific: name the exact table, query, or parameter. Never say "consider optimizing queries".
@@ -203,9 +207,10 @@ def analyze(
         response = llm.invoke(messages)
         raw_text = str(response.content).strip()
 
-        # Strip markdown code fences if the LLM wraps the JSON
-        raw_text = raw_text.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-
+        # Take the outermost JSON object; tolerates code fences and stray prose.
+        start, end = raw_text.find("{"), raw_text.rfind("}")
+        if start != -1 and end > start:
+            raw_text = raw_text[start:end + 1]
         parsed = json.loads(raw_text)
     except json.JSONDecodeError as exc:
         LOG.warning("RCA chain: LLM did not return valid JSON: %s", exc)

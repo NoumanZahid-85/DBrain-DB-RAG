@@ -36,14 +36,20 @@ from backend.diagnostics.models import ChangeProposal
 
 LOG = logging.getLogger("dbrain.change_manager")
 
-# SQL / commands that are never safe to auto-apply.
-_BLOCKED = re.compile(
-    r"""(?ix)
-    \b(DROP|DELETE|TRUNCATE|REPLACE|ALTER\s+TABLE\s+\S+\s+DROP
-       |RENAME\s+TABLE|REVOKE|GRANT|CREATE\s+USER|DROP\s+USER)\b
-    """,
-    re.VERBOSE | re.IGNORECASE,
+# Allowlist, not blocklist: LLM-written SQL runs with schema-owner rights, so
+# only these single-statement shapes may ever be applied.
+_ALLOWED_SQL = re.compile(
+    r"""(?ix) ^\s*(
+        CREATE\s+(UNIQUE\s+)?INDEX\b
+      | ANALYZE\b
+      | VACUUM\b
+      | OPTIMIZE\s+TABLE\b
+      | ALTER\s+TABLE\s+\S+\s+SET\s*\(
+      | ALTER\s+TABLE\s+\S+\s+ADD\s+(UNIQUE\s+)?(INDEX|KEY)\b
+      | SET\s+(GLOBAL|SESSION|PERSIST)\s
+    )""",
 )
+_FORBIDDEN_SQL = re.compile(r"(?i)\b(DROP|DELETE|TRUNCATE|UPDATE|INSERT|GRANT|REVOKE|COPY|PROGRAM)\b")
 
 
 class ChangeManager:
@@ -61,8 +67,7 @@ class ChangeManager:
         """Persist a new proposal (status=pending). Returns the proposal id."""
         if not proposal.id:
             proposal.id = uuid.uuid4().hex[:12]
-        sql_safe = self._validate_safety(proposal.sql_or_command)
-        if not sql_safe:
+        if not self._validate_safety(proposal.sql_or_command, proposal.engine):
             raise ValueError(
                 f"Proposed change contains a blocked operation: {proposal.sql_or_command[:100]}"
             )
@@ -220,14 +225,31 @@ class ChangeManager:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _validate_safety(sql: str) -> bool:
-        """Return False if the SQL contains a blocked operation."""
-        return not bool(_BLOCKED.search(sql))
+    def _validate_safety(sql: str, engine: str = "postgresql") -> bool:
+        """True only for one allowlisted statement (or a Mongo createIndex spec)."""
+        if engine == "mongodb":
+            try:
+                cmd = json.loads(sql)
+            except ValueError:
+                return False
+            return (
+                isinstance(cmd, dict)
+                and set(cmd) <= {"collection", "keys"}
+                and isinstance(cmd.get("collection"), str)
+                and isinstance(cmd.get("keys"), dict) and bool(cmd["keys"])
+            )
+        stmt = sql.strip().removesuffix(";")
+        if ";" in stmt or "--" in stmt or "/*" in stmt:
+            return False  # one statement, no comment tricks
+        return bool(_ALLOWED_SQL.match(stmt)) and not _FORBIDDEN_SQL.search(stmt)
 
     def _execute_change(self, proposal: ChangeProposal) -> None:
         """Execute the change against the appropriate live database."""
         engine = proposal.engine
         sql = proposal.sql_or_command.strip()
+        # Re-check at execution time: rows could have been edited in SQLite.
+        if not self._validate_safety(sql, engine):
+            raise ValueError("Change is outside the safe-operation allowlist")
 
         if engine == "postgresql":
             if not config.PG_APPLY_DSN:
@@ -235,12 +257,10 @@ class ChangeManager:
             import psycopg2
             conn = psycopg2.connect(config.PG_APPLY_DSN, connect_timeout=10)
             try:
-                # CREATE INDEX CONCURRENTLY cannot run inside a transaction block
-                if "concurrently" in sql.lower():
-                    conn.set_session(autocommit=True)
+                # CONCURRENTLY and VACUUM cannot run inside a transaction block
+                conn.autocommit = True
                 with conn.cursor() as cur:
                     cur.execute(sql)
-                conn.commit()
             finally:
                 conn.close()
 

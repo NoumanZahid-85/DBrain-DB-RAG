@@ -59,8 +59,8 @@ class MysqlInspector:
 
     def test_connection(self) -> bool:
         try:
-            with self._connect() as conn:
-                conn.execute("SELECT 1")
+            with self._connect() as conn, conn.cursor() as cur:
+                cur.execute("SELECT 1")
             return True
         except Exception:
             return False
@@ -159,7 +159,7 @@ class MysqlInspector:
                 seq_scans=0,      # MySQL doesn't expose per-table seq_scan without perf_schema
                 idx_scans=0,
                 live_rows=int(r.get("live_rows") or 0),
-                extra={"data_len": r.get("data_len"), "idx_len": r.get("idx_len")} if hasattr(r, "get") else {},
+                extra={"data_len": r.get("data_len"), "idx_len": r.get("idx_len")},
             )
             for r in rows
         ]

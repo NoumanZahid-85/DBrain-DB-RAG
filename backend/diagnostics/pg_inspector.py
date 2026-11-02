@@ -212,22 +212,21 @@ class PgInspector:
             return int(cur.fetchone()[0])
 
     def _bgwriter(self, conn) -> dict:
-        sql = """
-            SELECT checkpoints_timed, checkpoints_req,
-                   buffers_clean, buffers_backend,
-                   maxwritten_clean
-            FROM pg_stat_bgwriter;
-        """
-        with conn.cursor() as cur:
-            cur.execute(sql)
-            r = cur.fetchone()
-        if not r:
-            return {}
-        return {
-            "checkpoints_timed": r[0], "checkpoints_req": r[1],
-            "buffers_clean": r[2], "buffers_backend": r[3],
-            "maxwritten_clean": r[4],
-        }
+        """Checkpoint pressure. PG17 moved these counters to pg_stat_checkpointer."""
+        queries = (
+            "SELECT num_timed, num_requested FROM pg_stat_checkpointer",
+            "SELECT checkpoints_timed, checkpoints_req FROM pg_stat_bgwriter",
+        )
+        for sql in queries:
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(sql)
+                    r = cur.fetchone()
+                if r:
+                    return {"checkpoints_timed": r[0], "checkpoints_req": r[1]}
+            except Exception:  # noqa: BLE001 - view absent on this version
+                continue
+        return {}
 
     def _pg_version(self, conn) -> str:
         with conn.cursor() as cur:

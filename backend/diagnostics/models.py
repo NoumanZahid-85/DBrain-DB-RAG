@@ -31,6 +31,7 @@ class TableStat:
     live_rows: int = 0
     dead_rows: int = 0
     last_vacuum: str | None = None
+    extra: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
