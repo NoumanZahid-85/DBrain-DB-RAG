@@ -1,9 +1,12 @@
 """RAGAS evaluation script.
 
 Evaluate retrieved context and generated answers against the golden dataset.
-The evaluator LLM is standardised on Groq ``openai/gpt-oss-120b`` (same model
-as the RAG runtime), and evaluator embeddings use the local MiniLM provider —
-no Gemini dependency, matching the runtime stack in ``backend``.
+
+Evaluator LLM: Gemini (``GOOGLE_MODEL``) is preferred because Groq's
+``openai/gpt-oss-120b`` rejects the ``n > 1`` sampling RAGAS uses for
+``answer_relevancy`` (``'n' must be at most 1``), which yields zero scores.
+When no ``GOOGLE_API_KEY`` is set, we fall back to Groq. Embeddings always use
+the local MiniLM provider.
 
 CI gate: ``.github/workflows/eval.yml`` runs this and fails when faithfulness
 < 0.75 or answer_relevancy < 0.70.
@@ -57,9 +60,11 @@ def query_rag_with_retry(question: str, retries: int = 3, base_delay: int = 3) -
 
 
 def _build_evaluators():
-    """RAGAS LLM + embeddings on the same stack as the runtime.
+    """RAGAS LLM + embeddings.
 
-    LLM: Groq gpt-oss-120b (controlled failover to any ChatGroq-compatible model).
+    LLM: Gemini ``GOOGLE_MODEL`` (preferred — fully supports the ``n > 1``
+    sampling RAGAS uses for ``answer_relevancy``), falling back to Groq
+    ``GROQ_MODEL`` when no Google key is configured.
     Embeddings: local MiniLM via ChromaDB's bundled ONNX engine (no API key).
     """
     from ragas.embeddings import LangchainEmbeddingsWrapper
@@ -67,15 +72,39 @@ def _build_evaluators():
 
     from backend.vectorstore import get_embed_model, get_embedding_model
 
-    from langchain_groq import ChatGroq
+    eval_llm_obj = None
 
-    eval_llm_obj = ChatGroq(
-        model=config.GROQ_MODEL,
-        api_key=config.GROQ_API_KEY,
-        temperature=0.0,
-        max_tokens=config.MAX_OUTPUT_TOKENS,
-    )
-    print(f"Evaluator LLM: Groq ({config.GROQ_MODEL})")
+    # Preferred: Google Gemini (gemini-2.0-flash). Complete RAGAS compat.
+    if config.GOOGLE_API_KEY:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        try:
+            eval_llm_obj = ChatGoogleGenerativeAI(
+                model=config.GOOGLE_MODEL,
+                google_api_key=config.GOOGLE_API_KEY,
+                temperature=config.TEMPERATURE,
+                max_output_tokens=config.MAX_OUTPUT_TOKENS,
+            )
+            print(f"Evaluator LLM: Google Gemini ({config.GOOGLE_MODEL})")
+        except Exception as e:
+            print(f"  Google init failed: {e}")
+
+    # Fallback: Groq. Limited RAGAS compat (n=1 sampling) but works for
+    # faithfulness when the daily TPD budget allows.
+    if eval_llm_obj is None and config.GROQ_API_KEY:
+        from langchain_groq import ChatGroq
+        try:
+            eval_llm_obj = ChatGroq(
+                model=config.GROQ_MODEL,
+                api_key=config.GROQ_API_KEY,
+                temperature=config.TEMPERATURE,
+                max_tokens=config.MAX_OUTPUT_TOKENS,
+            )
+            print(f"Evaluator LLM: Groq ({config.GROQ_MODEL})")
+        except Exception as e:
+            print(f"  Groq init failed: {e}")
+
+    if eval_llm_obj is None:
+        raise RuntimeError("No LLM provider available for evaluation (need GOOGLE_API_KEY or GROQ_API_KEY)")
 
     eval_embeddings_obj = get_embed_model()
     print(f"Evaluator Embeddings: {get_embedding_model()}")
@@ -93,8 +122,8 @@ def run_evaluation(db_filter_eval: str | None = None) -> int:
         sys.stdout.flush()
         return 1
 
-    if not config.GROQ_API_KEY:
-        print("GROQ_API_KEY not set — evaluation requires an LLM provider.")
+    if not config.GOOGLE_API_KEY and not config.GROQ_API_KEY:
+        print("No LLM provider configured (need GOOGLE_API_KEY or GROQ_API_KEY) — evaluation cannot run.")
         sys.stdout.flush()
         return 1
 
@@ -152,13 +181,30 @@ def run_evaluation(db_filter_eval: str | None = None) -> int:
     from ragas.metrics import answer_relevancy, context_precision, faithfulness
 
     run_config = RunConfig(timeout=300)
-    scores = evaluate(
-        dataset,
-        metrics=[faithfulness, answer_relevancy, context_precision],
-        llm=evaluator_llm,
-        embeddings=evaluator_embeddings,
-        run_config=run_config,
-    )
+    
+    # Retry logic for RAGAS evaluation (handles rate limits during metric computation)
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            scores = evaluate(
+                dataset,
+                metrics=[faithfulness, answer_relevancy, context_precision],
+                llm=evaluator_llm,
+                embeddings=evaluator_embeddings,
+                run_config=run_config,
+            )
+            break
+        except Exception as e:  # noqa: BLE001
+            err_str = str(e)
+            if "429" in err_str or "rate limit" in err_str.lower() or "quota" in err_str.lower():
+                wait_time = 30 * (attempt + 1)
+                print(f"    [RAGAS Rate Limit] Retrying in {wait_time}s... (Attempt {attempt+1}/{max_retries})")
+                sys.stdout.flush()
+                time.sleep(wait_time)
+                if attempt == max_retries - 1:
+                    raise
+            else:
+                raise
 
     import math
 
